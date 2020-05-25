@@ -20,9 +20,9 @@ class TelemetryController {
 
       const { name, state, data: externalWeather } = weather.data;
       const {
-        temperature: externalTemperature,
-        humidity: externalHumidity,
-        pressure: externalPressure,
+        temperature: external_temperature,
+        humidity: external_humidity,
+        pressure: external_pressure,
       } = externalWeather;
       const telemetry = await Telemetry.create({
         city,
@@ -31,9 +31,9 @@ class TelemetryController {
         humidity,
         pressure,
         altitude,
-        externalTemperature,
-        externalHumidity,
-        externalPressure,
+        external_temperature,
+        external_humidity,
+        external_pressure,
         date: new Date(),
       });
 
