@@ -9,9 +9,9 @@ class Telemetry extends Sequelize.Model {
         humidity: Sequelize.DECIMAL,
         pressure: Sequelize.DECIMAL,
         altitude: Sequelize.DECIMAL,
-        externalTemperature: Sequelize.DECIMAL,
-        externalHumidity: Sequelize.DECIMAL,
-        externalPressure: Sequelize.DECIMAL,
+        external_temperature: Sequelize.DECIMAL,
+        external_humidity: Sequelize.DECIMAL,
+        external_pressure: Sequelize.DECIMAL,
         date: Sequelize.DATE,
       },
       { sequelize }
