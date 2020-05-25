@@ -8,7 +8,10 @@ class Database {
     this.init();
   }
   init() {
-    this.connection = new Sequelize(process.env.DATABASE_URL || connConfig);
+    this.connection = new Sequelize(
+      connConfig.use_env_variable,
+      connConfig.config
+    );
 
     models.map((model) => model.init(this.connection));
   }
