@@ -17,6 +17,8 @@
 <script>
     let internalTemperature = []
     let externalTemperature = []
+    let internalHumidity = []
+    let externalHumidity = []
     let time = []
     async function getData(){
         const resp = await fetch('https://telemetry1.herokuapp.com/telemetry')
@@ -28,6 +30,11 @@
             time.push(timeFormated)
         
             externalTemperature.push(temp.external_temperature)
+            
+            internalHumidity.push(parseFloat(temp.humidity).toFixed(2))
+            
+            externalHumidity.push(parseFloat(temp.external_humidity))
+
             window.myChart.update()
     })
     }
@@ -56,6 +63,26 @@ var myChart = new Chart(ctx, {
             
             borderWidth: 1,
             
+        },
+        {
+            label: 'Internal Humidity',
+            data: internalHumidity,
+            backgroundColor: 'yellow',
+			borderColor: 'yellow',
+            fill: false,
+            
+            borderWidth: 1,
+            
+        },
+        {
+            label: 'External Humidity',
+            data: externalHumidity,
+            backgroundColor: 'green',
+			borderColor: 'green',
+            fill: false,
+            
+            borderWidth: 1,
+            
         }
         ]
     },
@@ -78,24 +105,32 @@ var myChart = new Chart(ctx, {
 						display: true,
 						scaleLabel: {
 							display: true,
-							labelString: 'Hours',
+							labelString: 'Hour',
                             fontColor: '#FFF'
 						},
+                        gridLines: {
+                            color: '#262626',
+                        },
                         ticks:{
                             //fontColor: '#FFF'
+                            min: 0,
+                            max: 24
                         }
 					}],
 					yAxes: [{
-						display: true,
+						display: true,                        
 						scaleLabel: {
 							display: true,
-							labelString: 'Temperatures',
+							labelString: 'Temperature/Humidity',
                             fontColor: '#FFF'
 						},
+                        gridLines: {
+                            color: '#1a1a1a',
+                        },
 						ticks: {
                             //fontColor: '#FFF',
 							min: 0,
-							max: 45,
+							max: 100,
 
 							// forces step size to be 5 units
 							stepSize: 5
