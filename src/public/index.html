@@ -19,7 +19,7 @@
     let externalTemperature = []
     let time = []
     async function getData(){
-        const resp = await fetch('http://telemetry1.herokuapp.com/telemetry')
+        const resp = await fetch('https://telemetry1.herokuapp.com/telemetry')
         const json = await resp.json()
         json.map(temp=>{
             internalTemperature.push(temp.temperature)
