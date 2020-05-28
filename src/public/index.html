@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.css"></script>
+    <style>
+        body{
+            background-color: black;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="myChart" width="75%"></canvas>
+<script>
+    let internalTemperature = []
+    let externalTemperature = []
+    let time = []
+    async function getData(){
+        const resp = await fetch('http://telemetry1.herokuapp.com/telemetry')
+        const json = await resp.json()
+        json.map(temp=>{
+            internalTemperature.push(temp.temperature)
+            
+            const timeFormated = `${new Date(temp.date).getDate()}/${new Date(temp.date).getMonth()} ${new Date(temp.date).getHours()}h`
+            time.push(timeFormated)
+        
+            externalTemperature.push(temp.external_temperature)
+            window.myChart.update()
+    })
+    }
+    
+var ctx = document.getElementById('myChart').getContext('2d');
+var myChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: time,
+        datasets: [{
+            label: 'Internal Temperature',
+            data: internalTemperature,
+            backgroundColor: 'red',
+			borderColor: 'red',
+            fill: false,
+            
+            borderWidth: 1,
+            
+        },
+        {
+            label: 'External Temperature',
+            data: externalTemperature,
+            backgroundColor: 'blue',
+			borderColor: 'blue',
+            fill: false,
+            
+            borderWidth: 1,
+            
+        }
+        ]
+    },
+    options: {
+        responsive: true,
+				title: {
+					display: true,
+					text: 'Temperature Monitor'
+				},
+				tooltips: {
+					mode: 'index',
+					intersect: false,
+				},
+				hover: {
+					mode: 'nearest',
+					intersect: true
+				},
+				scales: {
+					xAxes: [{
+						display: true,
+						scaleLabel: {
+							display: true,
+							labelString: 'Hours',
+                            fontColor: '#FFF'
+						},
+                        ticks:{
+                            //fontColor: '#FFF'
+                        }
+					}],
+					yAxes: [{
+						display: true,
+						scaleLabel: {
+							display: true,
+							labelString: 'Temperatures',
+                            fontColor: '#FFF'
+						},
+						ticks: {
+                            //fontColor: '#FFF',
+							min: 0,
+							max: 45,
+
+							// forces step size to be 5 units
+							stepSize: 5
+						}
+					}]
+                }
+    
+    }
+});
+getData()
+</script>
+</body>
+</html>
