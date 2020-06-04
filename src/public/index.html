@@ -26,15 +26,9 @@
         json.map((temp) => {
           internalTemperature.push(temp.temperature);
 
-          const day = `${new Date(temp.date).getDate()}`.padStart(2, "0");
-          const month = `${new Date(temp.date).getMonth() + 1}`.padStart(
-            2,
-            "0"
-          );
-          const hour = `${new Date(temp.date).getHours()}`.padStart(2, "0");
-
-          const timeFormated = `${day}/${month}  ${hour}h`;
-
+          const timeFormated = `${new Date(temp.date).getDate()}/${
+            new Date(temp.date).getMonth() + 1
+          } ${new Date(temp.date).getHours()}h`;
           time.push(timeFormated);
 
           externalTemperature.push(temp.external_temperature);
@@ -42,8 +36,9 @@
           internalHumidity.push(parseFloat(temp.humidity).toFixed(2));
 
           externalHumidity.push(parseFloat(temp.external_humidity));
+
+          window.myChart.update();
         });
-        window.myChart.update();
       }
 
       var ctx = document.getElementById("myChart").getContext("2d");
