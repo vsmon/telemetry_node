@@ -19,12 +19,14 @@ double TEMPERATURE;
 double HUMIDITY;
 double PRESSURE;
 double ALTITUDE;
+int minutes = 1;
+int seconds = 1;
 
 #define SERVER_IP "telemetry1.herokuapp.com"
 
 #ifndef STASSID
-#define STASSID "SSID-WIFI"
-#define STAPSK  "PASSWORD-WIFI"
+#define STASSID "ssid-here"
+#define STAPSK  "password-here"
 #endif
 
 const char* ssid = STASSID;
@@ -60,7 +62,7 @@ void GetTemperature(){
  
     TEMPERATURE = bmp.readTemperature(); // chama método de leitura da classe dht,
                     
-    Serial.print(F("Temperatura: ")); //IMPRIME O TEXTO NO MONITOR SERIAL
+    Serial.print(F("Temperature: ")); //IMPRIME O TEXTO NO MONITOR SERIAL
     Serial.print(TEMPERATURE); //IMPRIME NO MONITOR SERIAL A TEMPERATURA
     Serial.println(" *C (Grau Celsius)"); //IMPRIME O TEXTO NO MONITOR SERIAL
 
@@ -77,7 +79,7 @@ void GetHumidity(){
 void GetPressure(){
     PRESSURE = bmp.readPressure();
   
-    Serial.print(F("Pressão: ")); //IMPRIME O TEXTO NO MONITOR SERIAL
+    Serial.print(F("Pressure: ")); //IMPRIME O TEXTO NO MONITOR SERIAL
     Serial.print(PRESSURE); //IMPRIME NO MONITOR SERIAL A PRESSÃO
     Serial.println(" Pa (Pascal)"); //IMPRIME O TEXTO NO MONITOR SERIAL
 }
@@ -232,7 +234,6 @@ void setup(void) {
 
   server.begin();
   Serial.println("HTTP server started");
-
 }
 
 void loop(void) {
@@ -244,17 +245,20 @@ void loop(void) {
     GetHumidity();
     GetPressure();
     GetAltitude();  
-    int minutes = DateTime.getParts().getMinutes();  
-    int seconds = DateTime.getParts().getSeconds();
+    minutes = DateTime.getParts().getMinutes();  
+    seconds = DateTime.getParts().getSeconds();
     Serial.println(minutes);
+    Serial.println(seconds);
     
-    if(minutes == 0){
+    if(minutes == 0 && seconds == 0){
       digitalWrite(LED, LOW);
       Serial.println("----------------------------------------Post executed--------------------------------------------------------");      
-      int httpCode = Post();
       
+      int httpCode = -1;
       while(httpCode != 200){
         httpCode = Post();
+        Serial.println("-------Dentro while-------------");
+        delay(1000);
       }
       //delay(30000);
       Serial.printf("Meu log: %d\n", httpCode);
