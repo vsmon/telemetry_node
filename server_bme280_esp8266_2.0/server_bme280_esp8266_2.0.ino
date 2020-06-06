@@ -23,8 +23,8 @@ double ALTITUDE;
 #define SERVER_IP "telemetry1.herokuapp.com"
 
 #ifndef STASSID
-#define STASSID "SSID-HERE"
-#define STAPSK  "PASS-HERE"
+#define STASSID "SSID-WIFI"
+#define STAPSK  "PASSWORD-WIFI"
 #endif
 
 const char* ssid = STASSID;
@@ -91,7 +91,7 @@ void GetAltitude(){
 
 }
 
-void Post(){
+int Post(){
     //WiFiClientSecure *client = new WiFiClientSecure;
     WiFiClient client;
     HTTPClient http;
@@ -131,11 +131,13 @@ void Post(){
         USE_SERIAL.println(payload);
         USE_SERIAL.println(">>");
       }
+      
     } else {
       USE_SERIAL.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());      
     }
 
     http.end();
+    return httpCode;
 }
 
 void handleBody() { //Handler for the body path
@@ -236,21 +238,32 @@ void setup(void) {
 void loop(void) {
   // wait for WiFi connection
   if ((WiFi.status() == WL_CONNECTED)) {
+    digitalWrite(LED, HIGH);
     DateTime.begin();
     GetTemperature();
     GetHumidity();
     GetPressure();
     GetAltitude();  
     int minutes = DateTime.getParts().getMinutes();  
+    int seconds = DateTime.getParts().getSeconds();
     Serial.println(minutes);
     
     if(minutes == 0){
+      digitalWrite(LED, LOW);
       Serial.println("----------------------------------------Post executed--------------------------------------------------------");      
-      Post();
-      delay(30000);
+      int httpCode = Post();
+      
+      while(httpCode != 200){
+        httpCode = Post();
+      }
+      //delay(30000);
+      Serial.printf("Meu log: %d\n", httpCode);
     }
+    digitalWrite(LED, HIGH);
     server.handleClient();
     MDNS.update();    
+  }else{
+    ESP.restart();
   }
   delay(1000);
 }
