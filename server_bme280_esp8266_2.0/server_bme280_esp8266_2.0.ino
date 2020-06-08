@@ -19,28 +19,21 @@ double TEMPERATURE;
 double HUMIDITY;
 double PRESSURE;
 double ALTITUDE;
+int hour    = 1;
 int minutes = 1;
 int seconds = 1;
 
 #define SERVER_IP "telemetry1.herokuapp.com"
 
 #ifndef STASSID
-#define STASSID "ssid-here"
-#define STAPSK  "password-here"
+#define STASSID "TYPE_SSID"
+#define STAPSK  "TYPE_PASSWORD"
 #endif
 
 const char* ssid = STASSID;
 const char* password = STAPSK;
 
 ESP8266WebServer server(3001);
-
-void setupDateTime(){
-  DateTime.setTimeZone(+3);
-  DateTime.begin();
-  if(!DateTime.isTimeValid()){
-    Serial.println("Failed to get time from server.");
-  }
-}
 
 void handleNotFound() {
   String message = "File Not Found\n\n";
@@ -77,7 +70,7 @@ void GetHumidity(){
 }
 
 void GetPressure(){
-    PRESSURE = bmp.readPressure();
+    PRESSURE = bmp.readPressure()/100;
   
     Serial.print(F("Pressure: ")); //IMPRIME O TEXTO NO MONITOR SERIAL
     Serial.print(PRESSURE); //IMPRIME NO MONITOR SERIAL A PRESSÃO
@@ -197,6 +190,15 @@ void handleBody() { //Handler for the body path
   }
   
 }
+
+void setupDateTime(){
+  DateTime.setTimeZone(3);
+  DateTime.begin();
+  if(!DateTime.isTimeValid()){
+    Serial.println("Failed to get time from server.");
+  }
+}
+
 void setup(void) {
   pinMode(LED, OUTPUT);
   Serial.begin(115200);
@@ -220,7 +222,8 @@ void setup(void) {
   Serial.println(ssid);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-  
+
+  setupDateTime();
   
   if (MDNS.begin("esp8266")) {
     Serial.println("MDNS responder started");
@@ -234,39 +237,44 @@ void setup(void) {
 
   server.begin();
   Serial.println("HTTP server started");
+  digitalWrite(LED, HIGH);
+  
 }
 
 void loop(void) {
   // wait for WiFi connection
   if ((WiFi.status() == WL_CONNECTED)) {
-    digitalWrite(LED, HIGH);
-    DateTime.begin();
+    DateTime.begin();    
     GetTemperature();
     GetHumidity();
     GetPressure();
     GetAltitude();  
+    hour    = DateTime.getParts().getHours();
     minutes = DateTime.getParts().getMinutes();  
     seconds = DateTime.getParts().getSeconds();
-    Serial.println(minutes);
-    Serial.println(seconds);
+    Serial.printf("Hour: %d\n", hour);
+    Serial.printf("Minutes: %d\n", minutes);
+    Serial.printf("Seconds: %d\n", seconds);
+    Serial.printf("WIFI STATUS: %d\n", WiFi.status());
     
-    if(minutes == 0 && seconds == 0){
+    if(minutes == 0 && seconds == 1 /*(minutes == 1 && seconds == 0) || (minutes == 30 && seconds == 0)*/){
       digitalWrite(LED, LOW);
       Serial.println("----------------------------------------Post executed--------------------------------------------------------");      
       
       int httpCode = -1;
-      while(httpCode != 200){
+      while(httpCode != 200 && WiFi.status() == WL_CONNECTED){
         httpCode = Post();
-        Serial.println("-------Dentro while-------------");
+        Serial.printf("-------Dentro while------------- %d\n", httpCode);
         delay(1000);
       }
-      //delay(30000);
-      Serial.printf("Meu log: %d\n", httpCode);
+      Serial.printf("Meu log: %d\n", httpCode);      
     }
+    
     digitalWrite(LED, HIGH);
     server.handleClient();
     MDNS.update();    
   }else{
+    Serial.printf("Not connected: %d\n", WiFi.status());
     ESP.restart();
   }
   delay(1000);
