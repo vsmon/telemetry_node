@@ -22,6 +22,8 @@ class ExternalIpController {
     return res.json({ externalIp: nconf.get("ip") });
   }
   async index(req, res) {
+    nconf.use("file", { file: "./config.json" });
+    nconf.load();
     const ip = nconf.get("ip");
 
     if (!ip) {
