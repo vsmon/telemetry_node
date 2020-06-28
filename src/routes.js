@@ -5,7 +5,9 @@ const routes = new Router();
 
 routes.get("/", (req, res) => res.json({ ok: true }));
 routes.get("/externalip", (req, res) => {
-  const [, , , externalIp] = req.connection.remoteAddress.split(":", -15);
+  const [, , , remoteIp] = req.connection.remoteAddress.split(":", -15);
+  const headerIp = req.headers["x-forwarded-for"].split(",")[0];
+  const externalIp = remoteIp || headerIp;
   res.json({ externalIp });
 });
 routes.post("/telemetry", TelemetryController.store);
