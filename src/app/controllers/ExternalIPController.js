@@ -9,15 +9,15 @@ class ExternalIpController {
     const externalIp = headerIp || remoteIp;
 
     if (ip !== externalIp) {
-      nconf.use("memory");
+      nconf.use("file", { file: "./config.json" });
       nconf.load();
       nconf.set("ip", externalIp);
-      /* nconf.save((error) => {
-              if (error) {
-                return res.status(400).json({ error: error.message });
-              }
-               console.log("Configuration save successfully"); 
-            }); */
+      nconf.save((error) => {
+        if (error) {
+          return res.status(400).json({ error: error.message });
+        }
+        console.log("Configuration save successfully");
+      });
     }
     return res.json({ externalIp: nconf.get("ip") });
   }
