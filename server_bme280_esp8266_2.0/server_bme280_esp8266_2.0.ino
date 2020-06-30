@@ -135,6 +135,42 @@ int Post(){
     return httpCode;
 }
 
+int PostExternalIp(){
+    //WiFiClientSecure *client = new WiFiClientSecure;
+    WiFiClient client;
+    HTTPClient http;
+
+    USE_SERIAL.print("[HTTP] begin...\n");
+    // configure traged server and url
+    http.begin(client,"http://" SERVER_IP "/externalip/"); //HTTP
+    http.addHeader("Content-Type", "application/json");
+    Serial.println("http://" SERVER_IP "/externalip/");
+    USE_SERIAL.print("[HTTP] POST...\n");
+    // start connection and send HTTP header and body
+
+      int httpCode = http.POST({});
+    
+    // httpCode will be negative on error
+    if (httpCode > 0) {
+      // HTTP header has been send and Server response header has been handled
+      USE_SERIAL.printf("[HTTP] POST... code: %d\n", httpCode);
+
+      // file found at server
+      if (httpCode == HTTP_CODE_OK) {
+        const String& payload = http.getString();
+        USE_SERIAL.println("received payload:\n<<");
+        USE_SERIAL.println(payload);
+        USE_SERIAL.println(">>");
+      }
+      
+    } else {
+      USE_SERIAL.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());      
+    }
+
+    http.end();
+    return httpCode;
+}
+
 void handleBody() { //Handler for the body path
   if (server.method() == HTTP_GET){
     //Encode JSON    
@@ -222,6 +258,8 @@ void setup(void) {
   Serial.println(ssid);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+  Serial.print("IP DNS: ");
+  Serial.println(WiFi.dnsIP());
 
   setupDateTime();
   
@@ -256,18 +294,16 @@ void loop(void) {
     Serial.printf("Minutes: %d\n", minutes);
     Serial.printf("Seconds: %d\n", seconds);
     Serial.printf("WIFI STATUS: %d\n", WiFi.status());
+
+    if(seconds == 30){
+      while(PostExternalIp() != 200);
+    }
     
-    if(minutes == 0 && seconds == 1 /*(minutes == 1 && seconds == 0) || (minutes == 30 && seconds == 0)*/){
+    if(minutes == 0 && seconds == 1 ){
       digitalWrite(LED, LOW);
       Serial.println("----------------------------------------Post executed--------------------------------------------------------");      
-      
-      int httpCode = -1;
-      while(httpCode != 200 && WiFi.status() == WL_CONNECTED){
-        httpCode = Post();
-        Serial.printf("-------Dentro while------------- %d\n", httpCode);
-        delay(1000);
-      }
-      Serial.printf("Meu log: %d\n", httpCode);      
+
+      while(Post() != 200);    
     }
     
     digitalWrite(LED, HIGH);
