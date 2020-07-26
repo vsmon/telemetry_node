@@ -24,10 +24,11 @@ int minutes = 1;
 int seconds = 1;
 
 #define SERVER_IP "telemetry1.herokuapp.com"
+#define TOKEN "TOKEN_HERE"
 
 #ifndef STASSID
-#define STASSID "TYPE_SSID"
-#define STAPSK  "TYPE_PASSWORD"
+#define STASSID "SSID_HERE"
+#define STAPSK  "PASS_HERE"
 #endif
 
 const char* ssid = STASSID;
@@ -93,9 +94,9 @@ int Post(){
 
     USE_SERIAL.print("[HTTP] begin...\n");
     // configure traged server and url
-    http.begin(client,"http://" SERVER_IP "/telemetry/"); //HTTP
+    http.begin(client,"http://" SERVER_IP "/telemetry?token=" TOKEN); //HTTP
     http.addHeader("Content-Type", "application/json");
-    Serial.println("http://" SERVER_IP "/telemetry/");
+    Serial.println("http://" SERVER_IP "/telemetry?token=" TOKEN);
     USE_SERIAL.print("[HTTP] POST...\n");
     // start connection and send HTTP header and body
     
@@ -142,9 +143,9 @@ int PostExternalIp(){
 
     USE_SERIAL.print("[HTTP] begin...\n");
     // configure traged server and url
-    http.begin(client,"http://" SERVER_IP "/externalip/"); //HTTP
+    http.begin(client,"http://" SERVER_IP "/externalip?token=" TOKEN); //HTTP
     http.addHeader("Content-Type", "application/json");
-    Serial.println("http://" SERVER_IP "/externalip/");
+    Serial.println("http://" SERVER_IP "/externalip?token=" TOKEN);
     USE_SERIAL.print("[HTTP] POST...\n");
     // start connection and send HTTP header and body
 
@@ -275,6 +276,7 @@ void setup(void) {
 
   server.begin();
   Serial.println("HTTP server started");
+  while(PostExternalIp() != 200);
   digitalWrite(LED, HIGH);
   
 }
@@ -295,7 +297,7 @@ void loop(void) {
     Serial.printf("Seconds: %d\n", seconds);
     Serial.printf("WIFI STATUS: %d\n", WiFi.status());
 
-    if(seconds == 30){
+    if(minutes == 30 && seconds == 0 ){
       while(PostExternalIp() != 200);
     }
     
@@ -303,7 +305,9 @@ void loop(void) {
       digitalWrite(LED, LOW);
       Serial.println("----------------------------------------Post executed--------------------------------------------------------");      
 
-      while(Post() != 200);    
+      while(Post() != 200);
+
+      while(PostExternalIp() != 200);    
     }
     
     digitalWrite(LED, HIGH);
