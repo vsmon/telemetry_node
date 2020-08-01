@@ -1,5 +1,5 @@
 const Sequelize = require("sequelize");
-class Telemetry extends Sequelize.Model {
+class telemetries extends Sequelize.Model {
   static init(sequelize) {
     super.init(
       {
@@ -19,4 +19,4 @@ class Telemetry extends Sequelize.Model {
   }
 }
 
-module.exports = Telemetry;
+module.exports = telemetries;
