@@ -1,36 +1,44 @@
-const nconf = require("nconf");
+const ExternalIp = require("../models/ExternalIp");
+const sequelize = require("sequelize");
 class ExternalIpController {
   async store(req, res) {
-    const ip = nconf.get("ip");
     const [, , , remoteIp] = req.connection.remoteAddress.split(":", -15);
     const headerIp = req.headers["x-forwarded-for"]
       ? req.headers["x-forwarded-for"].split(",")[0]
       : "";
     const externalIp = headerIp || remoteIp;
 
-    if (ip !== externalIp) {
-      nconf.use("file", { file: "./config.json" });
-      nconf.load();
-      nconf.set("ip", externalIp);
-      nconf.save((error) => {
-        if (error) {
-          return res.status(400).json({ error: error.message });
-        }
-        console.log("Configuration save successfully");
+    const maxId = await ExternalIp.max("id");
+
+    if (!maxId) {
+      const ip = await ExternalIp.create({
+        external_ip: externalIp,
       });
+      return res.json({ externalIp: ip });
     }
-    return res.json({ externalIp: nconf.get("ip") });
+
+    const { external_ip } = await ExternalIp.findByPk(maxId);
+
+    if (externalIp !== external_ip) {
+      try {
+        const ip = await ExternalIp.create({
+          external_ip: externalIp,
+        });
+        return res.json({ externalIp: ip });
+      } catch (error) {
+        return res.status(400).json({ error: error.message });
+      }
+    }
+    return res.json({ message: "Ip já atualizado." });
   }
   async index(req, res) {
-    nconf.use("file", { file: "./config.json" });
-    nconf.load();
-    const ip = nconf.get("ip");
-
-    if (!ip) {
+    const maxId = await ExternalIp.max("id");
+    const { id, external_ip } = await ExternalIp.findByPk(maxId);
+    if (!external_ip) {
       return res.status(400).json({ error: "Nenhum ip encontrado!" });
     }
 
-    return res.json({ externalIp: ip });
+    return res.json({ id: id, externalIp: external_ip });
   }
 }
 

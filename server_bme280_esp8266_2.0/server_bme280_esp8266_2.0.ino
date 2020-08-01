@@ -28,7 +28,7 @@ int seconds = 1;
 
 #ifndef STASSID
 #define STASSID "SSID_HERE"
-#define STAPSK  "PASS_HERE"
+#define STAPSK  "PASSWORD_HERE"
 #endif
 
 const char* ssid = STASSID;
@@ -297,9 +297,9 @@ void loop(void) {
     Serial.printf("Seconds: %d\n", seconds);
     Serial.printf("WIFI STATUS: %d\n", WiFi.status());
 
-    if(minutes == 30 && seconds == 0 ){
-      while(PostExternalIp() != 200);
-    }
+//    if(minutes == 30 && seconds == 0 ){
+//      while(PostExternalIp() != 200);
+//    }
     
     if(minutes == 0 && seconds == 1 ){
       digitalWrite(LED, LOW);
