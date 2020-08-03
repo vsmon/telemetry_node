@@ -14,6 +14,7 @@ module.exports = {
       timestamps: true,
       underscored: true,
       underscoredAll: true,
+      freezeTableName: true,
     },
   },
 };
@@ -21,10 +22,9 @@ module.exports = {
 /* module.exports = {
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  database: process.env.DATABASE_URL || process.env.DB_DATABASE,
+  database: process.env.DB_DATABASE,
   host: process.env.DB_HOST,
   port: 5432,
-  use_env_variable: process.env.DATABASE_URL,
   dialect: "postgres",
   dialectOptions: {
     ssl: {

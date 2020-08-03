@@ -24,10 +24,11 @@ int minutes = 1;
 int seconds = 1;
 
 #define SERVER_IP "telemetry1.herokuapp.com"
+#define TOKEN "TOKEN_HERE"
 
 #ifndef STASSID
-#define STASSID "TYPE_SSID"
-#define STAPSK  "TYPE_PASSWORD"
+#define STASSID "SSID_HERE"
+#define STAPSK  "PASSWORD_HERE"
 #endif
 
 const char* ssid = STASSID;
@@ -93,9 +94,9 @@ int Post(){
 
     USE_SERIAL.print("[HTTP] begin...\n");
     // configure traged server and url
-    http.begin(client,"http://" SERVER_IP "/telemetry/"); //HTTP
+    http.begin(client,"http://" SERVER_IP "/telemetry?token=" TOKEN); //HTTP
     http.addHeader("Content-Type", "application/json");
-    Serial.println("http://" SERVER_IP "/telemetry/");
+    Serial.println("http://" SERVER_IP "/telemetry?token=" TOKEN);
     USE_SERIAL.print("[HTTP] POST...\n");
     // start connection and send HTTP header and body
     
@@ -113,6 +114,42 @@ int Post(){
     
     serializeJson(doc, json);
     int httpCode = http.POST(json);
+    
+    // httpCode will be negative on error
+    if (httpCode > 0) {
+      // HTTP header has been send and Server response header has been handled
+      USE_SERIAL.printf("[HTTP] POST... code: %d\n", httpCode);
+
+      // file found at server
+      if (httpCode == HTTP_CODE_OK) {
+        const String& payload = http.getString();
+        USE_SERIAL.println("received payload:\n<<");
+        USE_SERIAL.println(payload);
+        USE_SERIAL.println(">>");
+      }
+      
+    } else {
+      USE_SERIAL.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());      
+    }
+
+    http.end();
+    return httpCode;
+}
+
+int PostExternalIp(){
+    //WiFiClientSecure *client = new WiFiClientSecure;
+    WiFiClient client;
+    HTTPClient http;
+
+    USE_SERIAL.print("[HTTP] begin...\n");
+    // configure traged server and url
+    http.begin(client,"http://" SERVER_IP "/externalip?token=" TOKEN); //HTTP
+    http.addHeader("Content-Type", "application/json");
+    Serial.println("http://" SERVER_IP "/externalip?token=" TOKEN);
+    USE_SERIAL.print("[HTTP] POST...\n");
+    // start connection and send HTTP header and body
+
+      int httpCode = http.POST({});
     
     // httpCode will be negative on error
     if (httpCode > 0) {
@@ -222,6 +259,8 @@ void setup(void) {
   Serial.println(ssid);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
+  Serial.print("IP DNS: ");
+  Serial.println(WiFi.dnsIP());
 
   setupDateTime();
   
@@ -237,6 +276,7 @@ void setup(void) {
 
   server.begin();
   Serial.println("HTTP server started");
+  while(PostExternalIp() != 200);
   digitalWrite(LED, HIGH);
   
 }
@@ -256,18 +296,18 @@ void loop(void) {
     Serial.printf("Minutes: %d\n", minutes);
     Serial.printf("Seconds: %d\n", seconds);
     Serial.printf("WIFI STATUS: %d\n", WiFi.status());
+
+//    if(minutes == 30 && seconds == 0 ){
+//      while(PostExternalIp() != 200);
+//    }
     
-    if(minutes == 0 && seconds == 1 /*(minutes == 1 && seconds == 0) || (minutes == 30 && seconds == 0)*/){
+    if(minutes == 0 && seconds == 1 ){
       digitalWrite(LED, LOW);
       Serial.println("----------------------------------------Post executed--------------------------------------------------------");      
-      
-      int httpCode = -1;
-      while(httpCode != 200 && WiFi.status() == WL_CONNECTED){
-        httpCode = Post();
-        Serial.printf("-------Dentro while------------- %d\n", httpCode);
-        delay(1000);
-      }
-      Serial.printf("Meu log: %d\n", httpCode);      
+
+      while(Post() != 200);
+
+      while(PostExternalIp() != 200);    
     }
     
     digitalWrite(LED, HIGH);

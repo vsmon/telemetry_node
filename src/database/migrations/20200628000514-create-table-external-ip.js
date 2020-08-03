@@ -2,13 +2,13 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable("external_ip", {
+    return queryInterface.createTable("externalIp", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         allowNull: false,
       },
-      ip: {
+      external_ip: {
         type: Sequelize.STRING,
         allowNull: false,
       },
@@ -24,6 +24,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable("external_ip");
+    return queryInterface.dropTable("externalIp");
   },
 };
