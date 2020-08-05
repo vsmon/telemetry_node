@@ -2,6 +2,14 @@ const api = require("../../api/axios");
 const Telemetry = require("../models/Telemetry");
 class TelemetryController {
   async store(req, res) {
+    const maxId = await Telemetry.max("id");
+    const { createdAt } = await Telemetry.findByPk(maxId);
+
+    if (new Date().getDate() === new Date(createdAt).getDate()) {
+      /* Ignora registro */
+      console.log("Igual");
+      return res.json({ message: "Registro Já existe com horario atual." });
+    }
     const { temperature, humidity, pressure, altitude } = req.body;
 
     const city = req.query.city || "sorocaba";
