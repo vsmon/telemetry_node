@@ -5,9 +5,15 @@ class TelemetryController {
     const maxId = await Telemetry.max("id");
     const { createdAt } = await Telemetry.findByPk(maxId);
 
+    const currentHour = new Date().getDate();
+    const lastHour = createdAt;
+
+    console.log(`Hora Atual: ${currentHour}`);
+    console.log(`Hora do ultimo registro: ${lastHour}`);
+
     if (new Date().getDate() === new Date(createdAt).getDate()) {
       /* Ignora registro */
-      console.log("Igual");
+      console.log("Registro Já existe com horario atual.");
       return res.json({ message: "Registro Já existe com horario atual." });
     }
     const { temperature, humidity, pressure, altitude } = req.body;
