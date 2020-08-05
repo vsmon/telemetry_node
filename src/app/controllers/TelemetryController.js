@@ -5,13 +5,14 @@ class TelemetryController {
     const maxId = await Telemetry.max("id");
     const { createdAt } = await Telemetry.findByPk(maxId);
 
-    const currentHour = new Date().getDate();
-    const lastHour = createdAt;
+    const currentHour = new Date().getHours();
+    const lastHour = new Date(createdAt).getHours();
 
+    console.log(`Data ultimo registro: ${createdAt}`);
     console.log(`Hora Atual: ${currentHour}`);
     console.log(`Hora do ultimo registro: ${lastHour}`);
 
-    if (new Date().getDate() === new Date(createdAt).getDate()) {
+    if (new Date().getHours() === new Date(createdAt).getHours()) {
       /* Ignora registro */
       console.log("Registro Já existe com horario atual.");
       return res.json({ message: "Registro Já existe com horario atual." });
