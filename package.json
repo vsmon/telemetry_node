@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "main": "server.js",
   "license": "MIT",
-  "private":true,
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "npm install node src/server.js"
+    "start": "node src/server.js"
   },
   "dependencies": {
     "axios": "^0.19.2",
