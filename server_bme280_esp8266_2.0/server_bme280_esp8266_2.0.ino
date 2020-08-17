@@ -24,11 +24,11 @@ int minutes = 1;
 int seconds = 1;
 
 #define SERVER_IP "telemetry1.herokuapp.com"
-#define TOKEN "TOKEN_HERE"
+#define TOKEN ""
 
 #ifndef STASSID
-#define STASSID "SSID_HERE"
-#define STAPSK  "PASSWORD_HERE"
+#define STASSID ""
+#define STAPSK  ""
 #endif
 
 const char* ssid = STASSID;
