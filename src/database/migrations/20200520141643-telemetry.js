@@ -5,6 +5,7 @@ module.exports = {
     return queryInterface.createTable("telemetries", {
       id: {
         type: Sequelize.INTEGER,
+        primaryKey: true,
         autoIncrement: true,
         allowNull: false,
       },
