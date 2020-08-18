@@ -23,7 +23,7 @@ int hour    = 1;
 int minutes = 1;
 int seconds = 1;
 
-#define SERVER_IP "telemetry1.herokuapp.com"
+#define SERVER_IP "telemetry-com-br.umbler.net"
 #define TOKEN ""
 
 #ifndef STASSID

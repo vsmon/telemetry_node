@@ -3,20 +3,24 @@ const Telemetry = require("../models/Telemetry");
 class TelemetryController {
   async store(req, res) {
     const maxId = await Telemetry.max("id");
-    const { createdAt } = await Telemetry.findByPk(maxId);
 
-    const currentHour = new Date().getHours();
-    const lastHour = new Date(createdAt).getHours();
+    if (maxId) {
+      const { createdAt } = await Telemetry.findByPk(maxId);
 
-    console.log(`Data ultimo registro: ${createdAt}`);
-    console.log(`Hora Atual: ${currentHour}`);
-    console.log(`Hora do ultimo registro: ${lastHour}`);
+      const currentHour = new Date().getHours();
+      const lastHour = new Date(createdAt).getHours();
 
-    if (new Date().getHours() === new Date(createdAt).getHours()) {
-      /* Ignora registro */
-      console.log("Registro Já existe com horario atual.");
-      return res.json({ message: "Registro Já existe com horario atual." });
+      console.log(`Data ultimo registro: ${createdAt}`);
+      console.log(`Hora Atual: ${currentHour}`);
+      console.log(`Hora do ultimo registro: ${lastHour}`);
+
+      if (new Date().getHours() === new Date(createdAt).getHours()) {
+        /* Ignora registro */
+        console.log("Registro Já existe com horario atual.");
+        return res.json({ message: "Registro Já existe com horario atual." });
+      }
     }
+
     const { temperature, humidity, pressure, altitude } = req.body;
 
     const city = req.query.city || "sorocaba";

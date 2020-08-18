@@ -33,10 +33,12 @@ class ExternalIpController {
   }
   async index(req, res) {
     const maxId = await ExternalIp.max("id");
-    const { id, external_ip } = await ExternalIp.findByPk(maxId);
-    if (!external_ip) {
+
+    if (!maxId) {
       return res.status(400).json({ error: "Nenhum ip encontrado!" });
     }
+
+    const { id, external_ip } = await ExternalIp.findByPk(maxId);
 
     return res.json({ id: id, externalIp: external_ip });
   }
