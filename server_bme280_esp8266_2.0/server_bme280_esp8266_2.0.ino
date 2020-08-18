@@ -24,11 +24,11 @@ int minutes = 1;
 int seconds = 1;
 
 #define SERVER_IP "telemetry1.herokuapp.com"
-#define TOKEN "TOKEN_HERE"
+#define TOKEN ""
 
 #ifndef STASSID
-#define STASSID "SSID_HERE"
-#define STAPSK  "PASSWORD_HERE"
+#define STASSID ""
+#define STAPSK  ""
 #endif
 
 const char* ssid = STASSID;
@@ -133,6 +133,7 @@ int Post(){
     }
 
     http.end();
+    delay(10000);
     return httpCode;
 }
 
@@ -307,7 +308,7 @@ void loop(void) {
 
       while(Post() != 200);
 
-      while(PostExternalIp() != 200);    
+//      while(PostExternalIp() != 200);    
     }
     
     digitalWrite(LED, HIGH);
