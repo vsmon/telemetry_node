@@ -1,0 +1,8 @@
+{
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/145d8556-e051-41a8-ae27-3dd594742574/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/telemetry360",
+    "appService.deploySubpath": "."
+}
