@@ -21,7 +21,7 @@
       let externalHumidity = [];
       let time = [];
       async function getData() {
-        const resp = await fetch("https://telemetry1.herokuapp.com/telemetry");
+        const resp = await fetch("https://telemetry-com-br.umbler.net/telemetry");
         const json = await resp.json();
         json.slice(-72).map((temp) => {
           internalTemperature.push(temp.temperature);
