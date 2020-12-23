@@ -20,10 +20,11 @@
       let internalHumidity = [];
       let externalHumidity = [];
       let time = [];
-      async function getData() {
-        const resp = await fetch("http://localhost:3000/telemetry");
-        const json = await resp.json();
-        json.slice(-72).map((temp) => {
+      async function getData() { 
+        //const resp = await fetch("http://localhost:3000/telemetry");
+        const resp = JSON.parse('<%- data %>')
+        //const json = await resp.json();
+        resp.slice(-72).map((temp) => {
           internalTemperature.push(temp.temperature);
 
           const timeFormated = `${new Date(temp.date).getDate()}/${
