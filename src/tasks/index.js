@@ -22,7 +22,8 @@ month	1-12 (or names)
 day of week	0-7 (or names, 0 or 7 are sunday)
 */
 
-const schedule = "0 0 */1 * * *"
+//const schedule = "*/15 * * * * *" //Executa de 15 em 15 segundos
+const schedule = "0 0 */1 * * *" //Executa de 1 em 1 hora
 
 scheduler(schedule, () =>
 TelemetryController.store2()

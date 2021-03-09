@@ -181,19 +181,28 @@ class TelemetryController {
           },
         }
        );
-            
+           
+       if(weather.data === undefined){
+        const { temperature, humidity, pressure, altitude } = esp8266Resp.data;
+        const data = {
+          temperature,
+          humidity,
+          pressure,
+        }
+        return data
+       }
+
         const {          
           current: { temp: temperature },
           current: { humidity },
           current: { pressure },
-        } = weather.data;
+        } = weather.data;        
 
         const data = {
           temperature,
           humidity,
           pressure,
         }
-
         return data
         
         
@@ -235,7 +244,7 @@ class TelemetryController {
         humidity: external_humidity,
         pressure: external_pressure,
       } = weather;
-
+      
       const telemetry = await Telemetry.create({
         city,
         state,
