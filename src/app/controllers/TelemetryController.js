@@ -165,10 +165,6 @@ class TelemetryController {
         }
       }
 
-      const telemetry = {
-        temperature: 0,
-      };
-
       const esp8266Resp = await esp8266Data.get(`data`);
 
       const { temperature, humidity, pressure, altitude } = esp8266Resp.data;
