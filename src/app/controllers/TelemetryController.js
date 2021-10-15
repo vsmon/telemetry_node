@@ -5,6 +5,7 @@ const {
 } = require("../../services/api");
 const Telemetry = require("../models/Telemetry");
 const Mail = require("../../services/mail");
+const admin = require("../../config/firebase");
 
 class TelemetryController {
   async store(req, res) {
@@ -174,6 +175,7 @@ class TelemetryController {
       const tokenClima = process.env.TOKEN_CLIMATEMPO;
       const tokenOpenWeather = process.env.API_KEY_OPENWEATHER;
 
+      /* Get forecast Open Weather API */
       const getForecastOpenWeather = async (
         lat = "-23.506085",
         lon = "-47.454214"
@@ -205,6 +207,8 @@ class TelemetryController {
           return { error: true };
         }
       };
+
+      /* Get forecast Clima Tempo API */
       const getForecastClimaTempo = async (city = "Sorocaba", state = "SP") => {
         try {
           const cities = await api.get(`locale/city`, {
@@ -239,8 +243,6 @@ class TelemetryController {
           humidity: external_humidity,
           pressure: external_pressure,
         } = esp8266Resp.data;
-
-        telemetry.temperature = temperature;
       } else {
         var {
           temperature: external_temperature,
@@ -249,6 +251,7 @@ class TelemetryController {
         } = weather;
       }
 
+      /* Save data in DB */
       const telemetry = await Telemetry.create({
         city,
         state,
@@ -261,10 +264,30 @@ class TelemetryController {
         external_pressure,
         date: new Date(),
       });
+
+      /* Send notification */
+      const message = {
+        notification: {
+          title: "Temperatura Atual",
+          body: `${new Date().toLocaleDateString()}\n${new Date().toLocaleTimeString()}\nTemperatura Interna é: ${temperature}\nTemperatura Externa é: ${external_temperature}`,
+        },
+        topic: "monitor",
+      };
+      admin
+        .messaging()
+        .send(message)
+        .then((response) => {
+          console.log(response);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+
+      return res.status(200).json({ ok: true });
     } catch (error) {
       try {
-        //await Mail.sendMail(`${error.stack}\ndata:${error.data}`);
-        await Mail.sendMail(error.message);
+        console.log(`Ocorreu um erro: ${error}`);
+        await Mail.sendMail(error.stack);
         console.log(`Email enviado com sucesso.`);
       } catch (error) {
         console.error(`Ocorreu um erro no envio do email:`, error);
