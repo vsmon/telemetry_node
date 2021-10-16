@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const routes = require("./routes");
 require("./database");
-require("./tasks")
+require("./tasks");
 
 class App {
   constructor() {
@@ -12,8 +12,8 @@ class App {
   }
   middlewares() {
     //this.server.use(express.static(resolve(__dirname, "public")));
-    this.server.set('views', 'src/views')
-    this.server.engine('html', require('ejs').renderFile)
+    this.server.set("views", "src/views");
+    this.server.engine("html", require("ejs").renderFile);
     this.server.use(express.json());
     this.server.use(cors());
   }

@@ -7,6 +7,8 @@ const Telemetry = require("../models/Telemetry");
 const Mail = require("../../services/mail");
 const admin = require("../../config/firebase");
 
+const notification = require("../../services/notification");
+
 class TelemetryController {
   async store(req, res) {
     const maxId = await Telemetry.max("id");
@@ -162,7 +164,9 @@ class TelemetryController {
         if (new Date().getHours() === new Date(createdAt).getHours()) {
           //Ignora registro
           console.log("Registro Já existe com horario atual.");
-          return;
+          return res
+            .status(409)
+            .json({ error: "Registro Já existe com horario atual" });
         }
       }
 
@@ -267,26 +271,21 @@ class TelemetryController {
 
       /* Send notification */
       const message = {
-        notification: {
-          title: "Temperatura Atual",
-          body: `${new Date().toLocaleDateString()}\n${new Date().toLocaleTimeString()}\nTemperatura Interna é: ${temperature}\nTemperatura Externa é: ${external_temperature}`,
-        },
-        topic: "monitor",
+        title: "Temperatura Atual",
+        body: `${new Date().toLocaleDateString()}\n${new Date().toLocaleTimeString()}\nTemperatura Interna é: ${temperature}\nTemperatura Externa é: ${external_temperature}\nUmidade Interna é: ${humidity}\nUmidade Externa é: ${external_humidity}`,
       };
-      admin
-        .messaging()
-        .send(message)
-        .then((response) => {
-          console.log(response);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
+      notification(message);
 
       return res.status(200).json({ ok: true });
     } catch (error) {
       try {
         console.log(`Ocorreu um erro: ${error}`);
+        /* Send notification */
+        const message = {
+          title: "Ocorreu um erro",
+          body: error.stack,
+        };
+        notification(message);
         await Mail.sendMail(error.stack);
         console.log(`Email enviado com sucesso.`);
       } catch (error) {
