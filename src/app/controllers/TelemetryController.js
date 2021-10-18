@@ -272,7 +272,7 @@ class TelemetryController {
       /* Send notification */
       const message = {
         title: "Temperatura Atual",
-        body: `${new Date().toLocaleDateString()}\n${new Date().toLocaleTimeString()}\nTemperatura Interna é: ${temperature}\nTemperatura Externa é: ${external_temperature}\nUmidade Interna é: ${humidity}\nUmidade Externa é: ${external_humidity}`,
+        body: `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}\nTemperatura Interna é: ${temperature}\nTemperatura Externa é: ${external_temperature}\nUmidade Interna é: ${humidity}\nUmidade Externa é: ${external_humidity}`,
       };
       notification(message);
 
