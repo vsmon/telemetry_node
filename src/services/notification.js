@@ -2,7 +2,7 @@ const admin = require("../config/firebase");
 
 function notification({ title, body }) {
   const message = {
-    notification: {
+    data: {
       title: title,
       body: body,
     },
