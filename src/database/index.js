@@ -4,6 +4,7 @@ const Telemetry = require("../app/models/Telemetry");
 const connConfig = require("../config/database");
 const ExternalIp = require("../app/models/ExternalIp");
 const models = [Telemetry, ExternalIp];
+
 class Database {
   constructor() {
     this.init();

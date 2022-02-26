@@ -27,10 +27,7 @@
         resp.slice(-72).map((temp) => {
           internalTemperature.push(temp.temperature);
 
-          const timeFormated = `${new Date(temp.date).getDate()}/${
-            new Date(temp.date).getMonth() + 1
-          } ${new Date(temp.date).getHours()}h`;
-          time.push(timeFormated);
+          const timeFormated = `${new Date(temp.date).getDate()}/${new Date(temp.date).getMonth() + 1}/${new Date(temp.date).getFullYear()} ${new Date(temp.date).getHours()}h`;time.push(timeFormated);
 
           externalTemperature.push(temp.external_temperature);
 

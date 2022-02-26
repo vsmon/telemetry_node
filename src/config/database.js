@@ -47,11 +47,11 @@ require("dotenv").config();
  */
 
 module.exports = {
-  username: process.env.DB_USERNAME_UMBLER,
-  password: process.env.DB_PASSWORD_UMBLER,
-  database: process.env.DB_DATABASE_UMBLER,
-  host: process.env.DB_HOST_UMBLER,
-  port: process.env.DB_PORT_UMBLER,
+  username: process.env.DB_USERNAME_POSTGRES,
+  password: process.env.DB_PASSWORD_POSTGRES,
+  database: process.env.DB_DATABASE_POSTGRES,
+  host: process.env.DB_HOST_POSTGRES,
+  port: process.env.DB_PORT_POSTGRES,
   dialect: "postgres",
   define: {
     timestamps: true,
