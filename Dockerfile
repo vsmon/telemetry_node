@@ -8,10 +8,11 @@ WORKDIR /usr/app
 
 ## Copia tudo que começa com package e termina com .json para dentro da pasta /usr/app
 COPY package*.json ./
+COPY serviceAccountKey.json ./
 
 ## Executa npm install para adicionar as dependências e criar a pasta node_modules
 RUN npm install
-RUN npm install pm2 -g
+#RUN npm install pm2 -g
 
 ## Copia tudo que está no diretório onde o arquivo Dockerfile está 
 ## para dentro da pasta /usr/app do container
@@ -23,5 +24,6 @@ EXPOSE 3000
 
 ## Não se repete no Dockerfile
 ## Executa o comando npm start para iniciar o script que que está no package.json
-CMD [ "pm2-runtime", "start", "ecosystem.config.js" ]
+#CMD [ "pm2-runtime", "start", "ecosystem.config.js" ]
+CMD npm start
 

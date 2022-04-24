@@ -8,6 +8,7 @@ const routes = new Router();
 routes.get("/", GraphController.index);
 
 routes.get("/telemetry", TelemetryController.index);
+routes.get("/email", TelemetryController.email);
 
 routes.use(auth);
 
