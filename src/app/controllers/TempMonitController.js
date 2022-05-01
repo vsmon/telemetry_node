@@ -8,14 +8,17 @@ class TempMonitController {
       const temp = spawn("cat", ["/sys/class/thermal/thermal_zone0/temp"]);
 
       temp.stdout.on("data", async function (data) {
-        console.log("Result: " + data / 1000 + " degrees Celcius");
-        const degressCelcius = temp / 1000;
-        console.log("Result: " + degressCelcius + " degrees Celcius");
-        if (degressCelcius >= 47) {
-          await Mail.sendMail("teste de email");
+        console.log("Result: " + data / 1000 + " degrees Celsius");
+        const degressCelsius = temp / 1000;
+        console.log("Result: " + degressCelsius + " degrees Celsius");
+        if (degressCelsius >= 47) {
+          await Mail.sendMail(
+            `Temperatura do cpu excedeu os ${degressCelsius} graus celsius`,
+            "Temperatura CPU Raspberry pi excedida"
+          );
           console.log("Email enviado");
         }
-        return res.status(200).json({ temp: degressCelcius });
+        return res.status(200).json({ temp: degressCelsius });
       });
       temp.stdout.on("error", (error) => {
         console.error(`stderr: ${error}`);
