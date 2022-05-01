@@ -5,11 +5,11 @@ class Mail {
   constructor() {
     this.transporter = nodemailer.createTransport(configMail);
   }
-  sendMail(message) {
+  sendMail(message, subject) {
     return this.transporter.sendMail({
       from: process.env.MAIL_FROM,
       to: process.env.MAIL_TO,
-      subject: "OCORREU UM ERRO NA INTEGRACAO",
+      subject: subject,
       text: message,
     });
   }

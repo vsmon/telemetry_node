@@ -12,7 +12,7 @@ const notification = require("../../services/notification");
 class TelemetryController {
   async email(req, res) {
     try {
-      await Mail.sendMail("teste de email");
+      await Mail.sendMail("teste de email", "Teste de envio");
       return res.status(200).json({ true: "ok" });
     } catch (error) {
       console.log(error);
@@ -294,7 +294,7 @@ class TelemetryController {
           body: error.stack,
         };
         notification(message);
-        await Mail.sendMail(error.stack);
+        await Mail.sendMail(error.stack, "OCORREU UM ERRO NA INTEGRACAO");
         console.log(`Email enviado com sucesso.`);
       } catch (error) {
         console.error(`Ocorreu um erro no envio do email:`, error);
