@@ -4,7 +4,9 @@ const { restore } = require("../models/Telemetry");
 class TempMonitController {
   async sendAlert(req, res) {
     try {
-      console.log(new Date());
+      console.log(
+        new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })
+      );
       const temp = spawn("cat", ["/sys/class/thermal/thermal_zone0/temp"]);
 
       temp.stdout.on("data", async function (data) {
