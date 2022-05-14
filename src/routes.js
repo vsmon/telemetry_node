@@ -3,7 +3,7 @@ const auth = require("./app/middlewares/auth");
 const TelemetryController = require("./app/controllers/TelemetryController");
 const ExternalIPController = require("./app/controllers/ExternalIPController");
 const GraphController = require("./app/controllers/GraphController");
-const TempMonitController = require("./app/controllers/TempMonitController");
+const CpuTempController = require("./app/controllers/CpuTempController");
 const routes = new Router();
 
 routes.get("/", GraphController.index);
@@ -12,7 +12,7 @@ routes.get("/telemetry", TelemetryController.index);
 
 routes.use(auth);
 
-routes.get("/temperature", TempMonitController.sendAlert);
+routes.get("/temperature", CpuTempController.sendAlert);
 
 routes.post("/telemetry", TelemetryController.store2);
 routes.post("/telemetry/manual", TelemetryController.store);

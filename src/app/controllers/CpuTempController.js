@@ -1,7 +1,7 @@
 const { spawn } = require("child_process");
 const Mail = require("../../services/mail");
-const { restore } = require("../models/Telemetry");
-class TempMonitController {
+const notification = require("../../services/notification");
+class CpuTempController {
   async sendAlert(req, res) {
     try {
       console.log(
@@ -11,16 +11,28 @@ class TempMonitController {
 
       temp.stdout.on("data", async function (data) {
         //console.log("Result1: " + data / 1000 + " degrees Celsius");
-        const degressCelsius = data / 1000;
-        console.log("CPU Temperature : " + degressCelsius + " degrees Celsius");
-        if (degressCelsius >= 75) {
+        const currentTemp = data / 1000;
+        console.log("CPU Temperature : " + currentTemp + " degrees Celsius");
+
+        if (currentTemp >= 75) {
           await Mail.sendMail(
-            `A temperatura do cpu excedeu os ${degressCelsius} graus celsius`,
+            `A temperatura da cpu do raspberry pi excedeu ${currentTemp}°C, em 85°C, a cpu entrara em throttling.`,
             "Temperatura do CPU do Raspberry pi excedida"
           );
-          console.log("Email temperatura enviado");
+
+          console.log(
+            "Email temperatura excedida enviado",
+            `Temp: ${currentTemp}°C`
+          );
+
+          const message = {
+            title: "Temperatura CPU excedida",
+            body: `A temperatura da cpu do raspberry pi excedeu ${currentTemp}°C, em 85°C, a cpu entrara em throttling.`,
+          };
+
+          notification(message);
         }
-        return res.status(200).json({ temp: degressCelsius });
+        return res.status(200).json({ temp: currentTemp });
       });
       temp.stdout.on("error", (error) => {
         console.error(`stderr: ${error}`);
@@ -37,4 +49,4 @@ class TempMonitController {
   }
 }
 
-module.exports = new TempMonitController();
+module.exports = new CpuTempController();

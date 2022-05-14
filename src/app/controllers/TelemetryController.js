@@ -278,11 +278,11 @@ class TelemetryController {
       });
 
       /* Send notification */
-      const message = {
+      /* const message = {
         title: "Temperatura Atual",
         body: `${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}\nTemperatura Interna é: ${temperature}\nTemperatura Externa é: ${external_temperature}\nUmidade Interna é: ${humidity}\nUmidade Externa é: ${external_humidity}`,
       };
-      notification(message);
+      notification(message); */
 
       return res.status(200).json({ ok: true });
     } catch (error) {
