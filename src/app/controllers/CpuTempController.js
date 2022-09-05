@@ -7,6 +7,11 @@ class CpuTempController {
       console.log(
         new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })
       );
+      if (process.platform === "win32") {
+        return res.status(400).json({
+          error: "Essa Funcionalidade só pode ser executada no sistema linux",
+        });
+      }
       const temp = spawn("cat", ["/sys/class/thermal/thermal_zone0/temp"]);
 
       temp.stdout.on("data", async function (data) {

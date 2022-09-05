@@ -5,6 +5,7 @@ class externalIp extends Sequelize.Model {
     super.init(
       {
         external_ip: Sequelize.STRING,
+        internal_ip: Sequelize.STRING,
       },
       { sequelize }
     );

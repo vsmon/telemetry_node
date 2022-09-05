@@ -8,6 +8,7 @@ function notification({ title, body }) {
     },
     topic: "monitor",
   };
+  admin.fi;
   admin
     .messaging()
     .send(message)
