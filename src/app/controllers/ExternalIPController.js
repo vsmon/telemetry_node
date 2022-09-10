@@ -3,6 +3,7 @@ const { getFirestore } = require("firebase-admin/firestore");
 const { spawn } = require("child_process");
 const ExternalIp = require("../models/ExternalIp");
 const sequelize = require("sequelize");
+const fetch = require("node-fetch");
 
 class ExternalIpController {
   async store(req, res) {
@@ -14,33 +15,38 @@ class ExternalIpController {
       const internalIp = headerIp || remoteIp;
       let externalIp = "";
 
-      if (process.platform === "win32") {
+      const extIp = await fetch("http://api.ipify.org/");
+      externalIp = await extIp.text();
+
+      /* if (process.platform === "win32") {
         console.log("O IP externo só pode ser recuperado no sistema linux");
         return res.status(400).json({
           error: "O IP externo só pode ser recuperado no sistema linux",
         });
+      } */
+
+      if (externalIp === "" && process.platform !== "win32") {
+        const execCommand = spawn("dig", [
+          "+short",
+          "txt",
+          "ch",
+          "whoami.cloudflare",
+          "@1.0.0.1",
+        ]);
+
+        execCommand.on("error", (error) => {
+          console.log("Ocorreu um erro ao executar o processo: ", error);
+          return res.status(500).json({ error: error });
+        });
+
+        execCommand.stdout.on("error", (error) => {
+          console.error(`stderr: ${error}`);
+          return res.status(500).json({ error: error });
+        });
+        execCommand.stdout.on("data", (data) => {
+          externalIp = data.toString();
+        });
       }
-
-      const execCommand = spawn("dig", [
-        "+short",
-        "txt",
-        "ch",
-        "whoami.cloudflare",
-        "@1.0.0.1",
-      ]);
-
-      execCommand.stdout.on("error", (error) => {
-        console.error(`stderr: ${error}`);
-        return res.status(500).json({ error: error });
-      });
-      execCommand.on("error", (error) => {
-        console.log("Ocorreu um erro ao executar o processo: ", error);
-        return res.status(500).json({ error: error });
-      });
-
-      execCommand.stdout.on("data", (data) => {
-        externalIp = data.toString();
-      });
 
       if (!internalIp || !externalIp) {
         return res
