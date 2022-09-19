@@ -63,14 +63,18 @@ class ExternalIpController {
 
       await internalIpRef.set({
         ip: internalIp,
-        createdAt: new Date().toLocaleString(),
+        createdAt: new Date().toLocaleString("pt-BR", {
+          timeZone: "America/Sao_Paulo",
+        }),
       });
 
       const externalIpRef = db.collection("ips").doc("external");
 
       await externalIpRef.set({
         ip: externalIp,
-        createdAt: new Date().toLocaleString(),
+        createdAt: new Date().toLocaleString("pt-BR", {
+          timeZone: "America/Sao_Paulo",
+        }),
       });
 
       return res.json({ ip });
