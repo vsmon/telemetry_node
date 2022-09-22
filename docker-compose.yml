@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  nodejs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    #image: telemetry/node
+    container_name: telemetry
+    restart: unless-stopped
+    env_file: .env
+    #environment:
+      #- MONGO_USERNAME=$MONGO_USERNAME
+      #- MONGO_PASSWORD=$MONGO_PASSWORD
+      #- MONGO_HOSTNAME=db
+      #- MONGO_PORT=$MONGO_PORT
+      #- MONGO_DB=$MONGO_DB
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/usr/app
+   # networks:
+     # - app-network
