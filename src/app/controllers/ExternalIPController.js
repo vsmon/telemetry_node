@@ -4,6 +4,7 @@ const { spawn } = require("child_process");
 const ExternalIp = require("../models/ExternalIp");
 const sequelize = require("sequelize");
 const fetch = require("node-fetch");
+const notification = require("../../services/notification");
 
 class ExternalIpController {
   async store(req, res) {
@@ -76,6 +77,17 @@ class ExternalIpController {
           timeZone: "America/Sao_Paulo",
         }),
       });
+
+      const lastExternalIP = await externalIpRef.get();
+
+      if (lastExternalIP.data().ip !== externalIp) {
+        const message = {
+          title: "IP Externo Alterado",
+          body: `O IP externo ${externalIp} foi alterado.`,
+        };
+
+        notification(message);
+      }
 
       return res.json({ ip });
     } catch (error) {
