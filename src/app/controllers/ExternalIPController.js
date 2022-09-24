@@ -60,6 +60,7 @@ class ExternalIpController {
       });
 
       const db = getFirestore();
+
       const internalIpRef = db.collection("ips").doc("internal");
 
       await internalIpRef.set({
@@ -71,23 +72,23 @@ class ExternalIpController {
 
       const externalIpRef = db.collection("ips").doc("external");
 
+      const lastExternalIP = await externalIpRef.get();
+
+      if (lastExternalIP.data().ip !== externalIp) {
+        const message = {
+          title: "IP Externo Alterado",
+          body: `O IP externo foi alterado para ${externalIp}.`,
+        };
+
+        notification(message);
+      }
+
       await externalIpRef.set({
         ip: externalIp,
         createdAt: new Date().toLocaleString("pt-BR", {
           timeZone: "America/Sao_Paulo",
         }),
       });
-
-      const lastExternalIP = await externalIpRef.get();
-
-      if (lastExternalIP.data().ip !== externalIp) {
-        const message = {
-          title: "IP Externo Alterado",
-          body: `O IP externo ${externalIp} foi alterado.`,
-        };
-
-        notification(message);
-      }
 
       return res.json({ ip });
     } catch (error) {
