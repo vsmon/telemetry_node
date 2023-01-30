@@ -8,15 +8,15 @@ class PoweroffDisplayController {
       data: { status_display },
     } = await esp8266Data.get("data");
 
-    const currentTime = new Date()
-      .toLocaleTimeString()
-      .toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
+    const currentTime = new Date().toLocaleTimeString("pt-BR");
 
     const initialTime = new Date(
-      "2023-01-30T00:30:00.008Z"
-    ).toLocaleTimeString();
+      "2023-01-30T00:30:00.008-03:00"
+    ).toLocaleTimeString("pt-BR");
 
-    const finalTime = new Date("2023-01-30T08:30:00.008Z").toLocaleTimeString();
+    const finalTime = new Date(
+      "2023-01-30T08:30:00.008-03:00"
+    ).toLocaleTimeString("pt-BR");
 
     console.log("Current Time: ", currentTime);
     console.log("Intial Time: ", initialTime);
