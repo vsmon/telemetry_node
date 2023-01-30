@@ -11,12 +11,10 @@ class PoweroffDisplayController {
     const currentTime = new Date().toLocaleTimeString();
 
     const initialTime = new Date(
-      "2023-01-30T00:30:00.008-03:00"
+      "2023-01-30T00:30:00.008Z"
     ).toLocaleTimeString();
 
-    const finalTime = new Date(
-      "2023-01-30T08:30:00.008-03:00"
-    ).toLocaleTimeString();
+    const finalTime = new Date("2023-01-30T08:30:00.008Z").toLocaleTimeString();
 
     console.log("Current Time: ", currentTime);
     console.log("Intial Time: ", initialTime);
