@@ -9,7 +9,8 @@ services:
     container_name: telemetry
     restart: unless-stopped
     env_file: .env
-    #environment:
+    environment:    
+      TZ: "America/Sao_Paulo"
       #- MONGO_USERNAME=$MONGO_USERNAME
       #- MONGO_PASSWORD=$MONGO_PASSWORD
       #- MONGO_HOSTNAME=db
