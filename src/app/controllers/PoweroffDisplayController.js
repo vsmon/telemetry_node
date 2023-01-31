@@ -20,7 +20,7 @@ class PoweroffDisplayController {
       currentDay,
       0o0,
       30,
-      11
+      10
     );
 
     const finalTime = new Date(
@@ -29,7 +29,7 @@ class PoweroffDisplayController {
       currentDay,
       11,
       30,
-      59
+      10
     );
 
     console.log("Current Time: ", currentTime);
@@ -46,10 +46,7 @@ class PoweroffDisplayController {
       }
     }
 
-    if (
-      new Date(currentTime).getHours() === new Date(finalTime).getHours() &&
-      new Date(currentTime).getMinutes() === new Date(finalTime).getMinutes()
-    ) {
+    if (currentTime > finalTime) {
       if (status_display === 0) {
         console.log("Liga");
         const powerOn = await esp8266Data.post("/data", {
