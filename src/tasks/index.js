@@ -22,8 +22,9 @@ month	1-12 (or names)
 day of week	0-7 (or names, 0 or 7 are sunday)
 */
 
-//const schedule = "*/15 * * * * *"; //Executa de 15 em 15 segundos
+const schedule = "*/15 * * * * *"; //Executa de 15 em 15 segundos
 const scheduleGetTelemetry = "0 0 */1 * * *"; //Executa de 1 em 1 hora
+const scheduleNotifyTempCpu = "0 0 */1 * * *"; //Executa de 1 em 1 hora
 const scheduleAlertTemp = "0 */5 * * * *"; //Executa de 5 em 5 minutos
 const scheduleDDNS = "0 */5 * * * *"; //Executa de 5 em 5 minutos
 const schedulePoweroffDisplay = "0 */4 * * * *"; //Executa de 5 em 5 minutos
@@ -67,6 +68,16 @@ scheduler(schedulePoweroffDisplay, async () => {
   const response = await fetch(
     `http://localhost:3000/poweroffdisplay?token=${process.env.TOKEN}`,
     { method: "POST" }
+  );
+  const json = await response.json();
+  console.log(json);
+});
+
+/*Send notification hourly*/
+scheduler(scheduleNotifyTempCpu, async () => {
+  const response = await fetch(
+    `http://localhost:3000/notifications/cputemp?token=${process.env.TOKEN}`,
+    { method: "GET" }
   );
   const json = await response.json();
   console.log(json);

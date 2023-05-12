@@ -6,6 +6,7 @@ const GraphController = require("./app/controllers/GraphController");
 const CpuTempController = require("./app/controllers/CpuTempController");
 const DDNSController = require("./app/controllers/DDNSController");
 const PoweroffDisplayController = require("./app/controllers/PoweroffDisplayController");
+const NotificationController = require("./app/controllers/NotificationController");
 const routes = new Router();
 
 routes.get("/", GraphController.index);
@@ -26,4 +27,5 @@ routes.get("/ddns", DDNSController.index);
 routes.post("/poweroffdisplay", PoweroffDisplayController.store);
 
 routes.get("/email", TelemetryController.email);
+routes.get("/notifications/cputemp", NotificationController.sendTemperature);
 module.exports = routes;
