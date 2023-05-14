@@ -24,7 +24,7 @@ day of week	0-7 (or names, 0 or 7 are sunday)
 
 const schedule = "*/15 * * * * *"; //Executa de 15 em 15 segundos
 const scheduleGetTelemetry = "0 0 */1 * * *"; //Executa de 1 em 1 hora
-const scheduleNotifyTempCpu = "0 0 */1 * * *"; //Executa de 1 em 1 hora
+const scheduleNotifyTempCpu = "0 0 */10 * * *"; //Executa de 10 em 10 horas
 const scheduleAlertTemp = "0 */5 * * * *"; //Executa de 5 em 5 minutos
 const scheduleDDNS = "0 */5 * * * *"; //Executa de 5 em 5 minutos
 const schedulePoweroffDisplay = "0 */4 * * * *"; //Executa de 5 em 5 minutos
