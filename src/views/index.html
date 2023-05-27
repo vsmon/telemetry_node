@@ -6,14 +6,73 @@
     <title>Document</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.css"></script>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <style>
       body {
         background-color: black;
+      }     
+      .pagination > li > a
+      {
+        background-color: black;
+        color: white;
       }
+      .pagination > .active > a
+      {
+          color: white;
+          background-color: gray !Important;
+          border: solid 1px gray !Important;
+      }
+      .pagination > .active > a:hover
+      {
+        background-color: gray !Important;
+        border: solid 1px gray;
+      }
+      .pagination > li > a:hover
+      {
+        background-color: gray !Important;
+        color: white
+      }
+      
     </style>
   </head>
   <body>
-    <canvas id="myChart" width="75%"></canvas>
+    <canvas id="myChart" width="75%" ></canvas>
+    <div style="margin: auto; text-align: center;">
+      <% if (qtPages > 0) { %>
+        <ul class="pagination text-center bg">
+            <% if (page == 1) { %>
+                <li class="disabled"><a>First</a></li>
+            <% } else { %>
+                <li><a href="/?page=1">First</a></li>
+            <% } %>
+
+             <% var i = (Number(page) > 31 ? Number(page) - 30 : 1) %>
+            <% if (i !== 1) { %>
+                <li class="disabled"><a>...</a></li>
+            <% } %>
+
+            <% for (; i <= (Number(page) + 30) && i <= qtPages; i++) { %>
+                <% if (i == page) { %>
+                    <li class="active"><a><%= i %></a></li>
+                <% } else { %>
+                    <li><a href="/?page=<%= i %>"><%= i %></a></li>
+                <% } %>
+
+                <% if (i == Number(page) + 30 && i < qtPages) { %>
+                    <li class="disabled"><a>...</a></li>
+                <% } %>
+
+            <% } %>
+
+            <% if (page == qtPages) { %>
+                <li class="disabled"><a>Last</a></li>
+            <% } else { %>
+                <li><a href="/?page=<%= qtPages %>">Last</a></li>
+            <% } %>
+        </ul>
+    <% } %>
+    
+    </div>
     <script>
       let internalTemperature = [];
       let externalTemperature = [];
@@ -24,8 +83,8 @@
         //const resp = await fetch("http://localhost:3000/telemetry");
         const resp = JSON.parse('<%- data %>')
         //const json = await resp.json();
-        resp.slice(-72).map((temp) => {
-          internalTemperature.push(temp.temperature);
+        resp.map((temp) => {
+          internalTemperature.push(parseFloat(temp.temperature).toFixed(2));
 
           const timeFormated = `${new Date(temp.date).getDate()}/${new Date(temp.date).getMonth() + 1}/${new Date(temp.date).getFullYear()} ${new Date(temp.date).getHours()}h`;time.push(timeFormated);
 
