@@ -15,6 +15,11 @@ class HomeController {
       order: [["id", "ASC"]],
     });
 
+    const maxDate = telemetry[telemetry.length - 1].date;
+    const minDate = telemetry[0].date;
+    console.log("MAX DATE", maxDate);
+    console.log("MIN DATE", minDate);
+
     res.render("index.html", {
       data: JSON.stringify(telemetry),
       totalItems,
