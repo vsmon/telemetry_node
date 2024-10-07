@@ -1,4 +1,4 @@
-const axios = require('axios')
+const axios = require("axios");
 require("dotenv").config();
 
 const tokenClimatempo = process.env.API_KEY_CLIMATEMPO;
@@ -14,15 +14,15 @@ const apiClimaTempo = axios.create({
 });
 
 const apiOpenWeather = axios.create({
-  baseURL: `https://api.openweathermap.org/data/2.5/`,
+  baseURL: `https://api.openweathermap.org/data/3.0/`,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
-  },  
+  },
 });
 
 const esp8266Data = axios.create({
-  baseURL: `http://192.168.0.40:3001`
-})
+  baseURL: `http://192.168.0.40:3001`,
+});
 
 module.exports = { apiClimaTempo, apiOpenWeather, esp8266Data };

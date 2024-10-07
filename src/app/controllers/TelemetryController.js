@@ -156,6 +156,7 @@ class TelemetryController {
   }
   async store2(req, res) {
     console.log("executou...");
+
     try {
       const maxId = await Telemetry.max("id");
 
@@ -216,7 +217,7 @@ class TelemetryController {
           };
           return data;
         } catch (error) {
-          return { error: true };
+          return { error: true, message: error };
         }
       };
 
