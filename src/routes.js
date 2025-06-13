@@ -3,6 +3,7 @@ const auth = require("./app/middlewares/auth");
 const TelemetryController = require("./app/controllers/TelemetryController");
 const ExternalIPController = require("./app/controllers/ExternalIPController");
 const GraphController = require("./app/controllers/GraphController");
+const GasCalculatorController = require("./app/controllers/GasCalculatorController");
 const CpuTempController = require("./app/controllers/CpuTempController");
 const DDNSController = require("./app/controllers/DDNSController");
 const PoweroffDisplayController = require("./app/controllers/PoweroffDisplayController");
@@ -10,6 +11,7 @@ const NotificationController = require("./app/controllers/NotificationController
 const routes = new Router();
 
 routes.get("/", GraphController.index);
+routes.get("/gascalculator", GasCalculatorController.index);
 
 routes.get("/telemetry", TelemetryController.index);
 
