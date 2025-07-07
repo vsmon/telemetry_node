@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Índices Financeiros do Brasil</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #f0f4f8, #e6ecf3);
+            padding: 20px;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.8rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .indice {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease;
+        }
+
+        .indice:hover {
+            transform: scale(1.02);
+        }
+
+        .indice span:first-child::before {
+            margin-right: 8px;
+        }
+
+        #selic span:first-child::before {
+            content: "📈";
+        }
+
+        #cdi span:first-child::before {
+            content: "💹";
+        }
+
+        #dolar span:first-child::before {
+            content: "💵";
+        }
+
+        #bitcoin span:first-child::before {
+            content: "₿";
+        }
+
+        #bitcoin-usd span:first-child::before {
+            content: "🌎";
+        }
+
+        #ipca span:first-child::before {
+            content: "📊";
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .indice {
+                font-size: 1rem;
+                padding: 14px 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Índices Financeiros do Brasil</h1>
+        <div class="indice" id="selic"><span>Taxa Selic</span><span>carregando...</span></div>
+        <div class="indice" id="cdi"><span>CDI (12 meses)</span><span>carregando...</span></div>
+        <div class="indice" id="dolar"><span>Dólar</span><span>carregando...</span></div>
+        <div class="indice" id="bitcoin"><span>Bitcoin (BRL)</span><span>carregando...</span></div>
+        <div class="indice" id="bitcoin-usd"><span>Bitcoin (USD)</span><span>carregando...</span></div>
+        <div class="indice" id="ipca"><span>IPCA 12 meses</span><span>carregando...</span></div>
+    </div>
+
+    <script>
+        async function atualizarIndices() {
+            try {
+                const [selicResp, cdiResp, dolarResp, bitcoinBRLResp, bitcoinUSDResp, ipcaResp] = await Promise.all([
+                    fetch("https://api.bcb.gov.br/dados/serie/bcdata.sgs.1178/dados/ultimos/1?formato=json"),
+                    fetch("https://api.bcb.gov.br/dados/serie/bcdata.sgs.4389/dados/ultimos/1?formato=json"),
+                    fetch("https://economia.awesomeapi.com.br/json/last/USD-BRL"),
+                    fetch("https://cointradermonitor.com/api/pbb/v1/ticker"),
+                    fetch("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"),
+                    fetch("https://api.bcb.gov.br/dados/serie/bcdata.sgs.433/dados/ultimos/12?formato=json")
+                ]);
+
+                const selic = await selicResp.json();
+                const cdi = await cdiResp.json();
+                const dolar = await dolarResp.json();
+                const bitcoinBRL = await bitcoinBRLResp.json();
+                const bitcoinUSD = await bitcoinUSDResp.json();
+                const ipca = await ipcaResp.json();
+
+                document.getElementById("selic").children[1].innerText = (+selic[0].valor + 0.1).toFixed(2) + "%";
+                document.getElementById("cdi").children[1].innerText = parseFloat(cdi[0].valor).toFixed(2) + "%";
+
+                const dolarBRL = parseFloat(dolar.USDBRL.bid);
+                document.getElementById("dolar").children[1].innerText = dolarBRL.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL"
+                });
+
+                const btcBRL = bitcoinBRL.last;
+                document.getElementById("bitcoin").children[1].innerText = btcBRL.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL"
+                });
+
+                const btcUSD = bitcoinUSD.bitcoin.usd;
+                document.getElementById("bitcoin-usd").children[1].innerText = btcUSD.toLocaleString(undefined, {
+                    style: "currency",
+                    currency: "USD"
+                });
+
+                const ipcaAcumulado = ipca.reduce((soma, item) => soma + parseFloat(item.valor), 0);
+                document.getElementById("ipca").children[1].innerText = ipcaAcumulado.toFixed(2) + "%";
+            } catch (error) {
+                console.error("Erro ao buscar dados:", error);
+                alert("Erro ao carregar dados financeiros. Tente novamente mais tarde.");
+            }
+        }
+
+        atualizarIndices();
+    </script>
+</body>
+
+</html>
