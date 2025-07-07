@@ -8,12 +8,12 @@ const CpuTempController = require("./app/controllers/CpuTempController");
 const DDNSController = require("./app/controllers/DDNSController");
 const PoweroffDisplayController = require("./app/controllers/PoweroffDisplayController");
 const NotificationController = require("./app/controllers/NotificationController");
-const indicatorsController = require("./app/controllers/indicatorsController");
+const IndicatorsController = require("./app/controllers/IndicatorsController");
 const routes = new Router();
 
 routes.get("/", GraphController.index);
 routes.get("/gascalculator", GasCalculatorController.index);
-routes.get("/indicators", indicatorsController.index);
+routes.get("/indicators", IndicatorsController.index);
 
 routes.get("/telemetry", TelemetryController.index);
 
