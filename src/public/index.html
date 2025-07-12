@@ -1,148 +1,286 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.css"></script>
-    <style>
-      body {
-        background-color: black;
-      }
-    </style>
-  </head>
-  <body>
-    <canvas id="myChart" width="75%"></canvas>
-    <script>
-      let internalTemperature = [];
-      let externalTemperature = [];
-      let internalHumidity = [];
-      let externalHumidity = [];
-      let time = [];
-      async function getData() {
-        const resp = await fetch("http://localhost:3000/telemetry");
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Temperatures</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.css"></script>
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: black;
+      min-height: 100vh;
+      min-width: 100vw;
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      padding: 10px 0;
+      list-style: none;
+    }
+
+    .pagination li {
+      margin: 0 3px;
+    }
+
+    .pagination a {
+      color: white;
+      background: #222;
+      padding: 5px 10px;
+      border-radius: 3px;
+      text-decoration: none;
+      border: 1px solid #444;
+    }
+
+    .pagination .active a {
+      background: gray;
+      color: white;
+      border: 1px solid white;
+    }
+
+    .pagination .disabled a {
+      color: #888;
+      pointer-events: none;
+      background: #111;
+    }
+
+    #loading {
+      flex: 1;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2em;
+      transition: opacity 0.2s;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="loading">Carregando dados...</div>
+  <canvas id="myChart" width="75%"></canvas>
+  <ul class="pagination" id="pagination"></ul>
+  <script>
+    let internalTemperature = [];
+    let externalTemperature = [];
+    let internalHumidity = [];
+    let externalHumidity = [];
+    let time = [];
+    let allData = [];
+    let page = 1;
+    const pageSize = 72; // 24 registros por página
+
+    async function getData() {
+      document.getElementById('loading').style.display = 'flex';
+      try {
+        const resp = await fetch("https://rodrigofm.com.br/telemetry");
         const json = await resp.json();
-        json.slice(-72).map((temp) => {
-          internalTemperature.push(temp.temperature);
+        allData = json //json.slice(-72); // 72 últimos registros
+        page = Math.ceil(allData.length / pageSize)
+        renderPage(page);
+        renderPagination();
+      } catch (e) {
+        document.getElementById('loading').innerText = 'Erro ao carregar dados!';
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
 
-          const timeFormated = `${new Date(temp.date).getDate()}/${
-            new Date(temp.date).getMonth() + 1
-          } ${new Date(temp.date).getHours()}h`;
-          time.push(timeFormated);
+    function renderPage(pageNum) {
+      internalTemperature = [];
+      externalTemperature = [];
+      internalHumidity = [];
+      externalHumidity = [];
+      time = [];
 
-          externalTemperature.push(temp.external_temperature);
+      const start = (pageNum - 1) * pageSize;
+      const end = start + pageSize;
+      const pageData = allData.slice(start, end);
 
-          internalHumidity.push(parseFloat(temp.humidity).toFixed(2));
+      pageData.forEach((temp) => {
+        internalTemperature.push(temp.temperature);
 
-          externalHumidity.push(parseFloat(temp.external_humidity));
+        const timeFormated = `${new Date(temp.date).getDate()}/${new Date(temp.date).getMonth() + 1
+          }/${new Date(temp.date).getFullYear()} ${new Date(temp.date).getHours()}h`;
+        time.push(timeFormated);
 
-          window.myChart.update();
-        });
+        externalTemperature.push(temp.external_temperature);
+
+        internalHumidity.push(parseFloat(temp.humidity).toFixed(2));
+
+        externalHumidity.push(parseFloat(temp.external_humidity));
+      });
+
+      myChart.data.labels = time;
+      myChart.data.datasets[0].data = internalTemperature;
+      myChart.data.datasets[1].data = externalTemperature;
+      myChart.data.datasets[2].data = internalHumidity;
+      myChart.data.datasets[3].data = externalHumidity;
+      myChart.update();
+    }
+
+    function renderPagination() {
+      const totalPages = Math.ceil(allData.length / pageSize);
+      const pagination = document.getElementById('pagination');
+      pagination.innerHTML = '';
+
+      // First
+      const firstLi = document.createElement('li');
+      firstLi.className = page === 1 ? 'disabled' : '';
+      firstLi.innerHTML = `<a href="#">First</a>`;
+      firstLi.onclick = () => { if (page !== 1) { page = 1; renderPage(page); renderPagination(); } };
+      pagination.appendChild(firstLi);
+
+      // Previous
+      const prevLi = document.createElement('li');
+      prevLi.className = page === 1 ? 'disabled' : '';
+      prevLi.innerHTML = `<a href="#">&laquo;</a>`;
+      prevLi.onclick = () => { if (page > 1) { page--; renderPage(page); renderPagination(); } };
+      pagination.appendChild(prevLi);
+
+      // Page numbers
+      for (let i = 1; i <= totalPages; i++) {
+        if (i === 1 || i === totalPages || (i >= page - 2 && i <= page + 2)) {
+          const li = document.createElement('li');
+          li.className = page === i ? 'active' : '';
+          li.innerHTML = `<a href="#">${i}</a>`;
+          li.onclick = () => { page = i; renderPage(page); renderPagination(); };
+          pagination.appendChild(li);
+        } else if (
+          (i === page - 3 && page - 3 > 1) ||
+          (i === page + 3 && page + 3 < totalPages)
+        ) {
+          const li = document.createElement('li');
+          li.className = 'disabled';
+          li.innerHTML = `<a href="#">...</a>`;
+          pagination.appendChild(li);
+        }
       }
 
-      var ctx = document.getElementById("myChart").getContext("2d");
-      var myChart = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: time,
-          datasets: [
-            {
-              label: "Internal Temperature",
-              data: internalTemperature,
-              backgroundColor: "red",
-              borderColor: "red",
-              fill: false,
+      // Next
+      const nextLi = document.createElement('li');
+      nextLi.className = page === totalPages ? 'disabled' : '';
+      nextLi.innerHTML = `<a href="#">&raquo;</a>`;
+      nextLi.onclick = () => { if (page < totalPages) { page++; renderPage(page); renderPagination(); } };
+      pagination.appendChild(nextLi);
 
-              borderWidth: 1,
+      // Last
+      const lastLi = document.createElement('li');
+      lastLi.className = page === totalPages ? 'disabled' : '';
+      lastLi.innerHTML = `<a href="#">Last</a>`;
+      lastLi.onclick = () => { if (page !== totalPages) { page = totalPages; renderPage(page); renderPagination(); } };
+      pagination.appendChild(lastLi);
+    }
+
+    var ctx = document.getElementById("myChart").getContext("2d");
+    var myChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: time,
+        datasets: [
+          {
+            label: "Internal Temperature",
+            data: internalTemperature,
+            backgroundColor: "red",
+            borderColor: "red",
+            fill: false,
+            borderWidth: 1,
+          },
+          {
+            label: "External Temperature",
+            data: externalTemperature,
+            backgroundColor: "blue",
+            borderColor: "blue",
+            fill: false,
+            borderWidth: 1,
+          },
+          {
+            label: "Internal Humidity",
+            data: internalHumidity,
+            backgroundColor: "yellow",
+            borderColor: "yellow",
+            fill: false,
+            borderWidth: 1,
+          },
+          {
+            label: "External Humidity",
+            data: externalHumidity,
+            backgroundColor: "green",
+            borderColor: "green",
+            fill: false,
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        title: {
+          display: true,
+          text: "Temperature Monitor",
+        },
+        tooltips: {
+          mode: "index",
+          intersect: false,
+        },
+        hover: {
+          mode: "nearest",
+          intersect: true,
+        },
+        scales: {
+          xAxes: [
+            {
+              display: true,
+              scaleLabel: {
+                display: true,
+                labelString: "Hour",
+                fontColor: "#FFF",
+              },
+              gridLines: {
+                color: "#262626",
+              },
+              ticks: {
+                min: 0,
+                max: 24,
+              },
             },
+          ],
+          yAxes: [
             {
-              label: "External Temperature",
-              data: externalTemperature,
-              backgroundColor: "blue",
-              borderColor: "blue",
-              fill: false,
-
-              borderWidth: 1,
-            },
-            {
-              label: "Internal Humidity",
-              data: internalHumidity,
-              backgroundColor: "yellow",
-              borderColor: "yellow",
-              fill: false,
-
-              borderWidth: 1,
-            },
-            {
-              label: "External Humidity",
-              data: externalHumidity,
-              backgroundColor: "green",
-              borderColor: "green",
-              fill: false,
-
-              borderWidth: 1,
+              display: true,
+              scaleLabel: {
+                display: true,
+                labelString: "Temperature/Humidity",
+                fontColor: "#FFF",
+              },
+              gridLines: {
+                color: "#1a1a1a",
+              },
+              ticks: {
+                min: 0,
+                max: 100,
+                stepSize: 5,
+              },
             },
           ],
         },
-        options: {
-          responsive: true,
-          title: {
-            display: true,
-            text: "Temperature Monitor",
-          },
-          tooltips: {
-            mode: "index",
-            intersect: false,
-          },
-          hover: {
-            mode: "nearest",
-            intersect: true,
-          },
-          scales: {
-            xAxes: [
-              {
-                display: true,
-                scaleLabel: {
-                  display: true,
-                  labelString: "Hour",
-                  fontColor: "#FFF",
-                },
-                gridLines: {
-                  color: "#262626",
-                },
-                ticks: {
-                  //fontColor: '#FFF'
-                  min: 0,
-                  max: 24,
-                },
-              },
-            ],
-            yAxes: [
-              {
-                display: true,
-                scaleLabel: {
-                  display: true,
-                  labelString: "Temperature/Humidity",
-                  fontColor: "#FFF",
-                },
-                gridLines: {
-                  color: "#1a1a1a",
-                },
-                ticks: {
-                  //fontColor: '#FFF',
-                  min: 0,
-                  max: 100,
+      },
+    });
+    getData();
+  </script>
+</body>
 
-                  // forces step size to be 5 units
-                  stepSize: 5,
-                },
-              },
-            ],
-          },
-        },
-      });
-      getData();
-    </script>
-  </body>
 </html>

@@ -12,8 +12,9 @@ class App {
     this.routes();
   }
   middlewares() {
-    //this.server.use(express.static(resolve(__dirname, "public")));
-    this.server.use(express.static(path.join(__dirname, "public")));
+    this.server.use(
+      express.static(path.join(__dirname, "public"))
+    ); /* Uncomment it will be rendered index.html in public directory and commented it will be rendered /views/index.html  */
     this.server.set("views", "src/views");
     this.server.engine("html", require("ejs").renderFile);
     this.server.use(express.json());

@@ -1,213 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.css"></script>
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-    <style>
-      body {
-        background-color: black;
-      }     
-      .pagination > li > a
-      {
-        background-color: black;
-        color: white;
-      }
-      .pagination > .active > a
-      {
-          color: white;
-          background-color: gray !Important;
-          border: solid 1px white !Important;
-      }
-      .pagination > .active > a:hover
-      {
-        background-color: gray !Important;
-        border: solid 1px gray;
-      }
-      .pagination > li > a:hover
-      {
-        background-color: gray !Important;
-        color: white
-      }
-      .pagination > .disabled > a
-      {
-        background-color: black;
-      }
-      .pagination > .disabled > a:hover
-      {
-        color: white;
-      }
 
-    </style>
-  </head>
-  <body>
-    <canvas id="myChart" width="75%" ></canvas>
-    <div style="margin: auto; text-align: center;">
-      <% if (qtPages > 0) { %>
-        <ul class="pagination text-center bg">
-            <% if (page == 1) { %>
-                <li class="disabled"><a>First</a></li>
-            <% } else { %>
-                <li><a href="/?page=1">First</a></li>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/src/public/images/icons/index.ico" type="image/x-icon" />
+  <title>Document</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.css"></script>
+  <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <style>
+    body {
+      background-color: black;
+    }
+
+    .pagination>li>a {
+      background-color: black;
+      color: white;
+    }
+
+    .pagination>.active>a {
+      color: white;
+      background-color: gray !Important;
+      border: solid 1px white !Important;
+    }
+
+    .pagination>.active>a:hover {
+      background-color: gray !Important;
+      border: solid 1px gray;
+    }
+
+    .pagination>li>a:hover {
+      background-color: gray !Important;
+      color: white
+    }
+
+    .pagination>.disabled>a {
+      background-color: black;
+    }
+
+    .pagination>.disabled>a:hover {
+      color: white;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="myChart" width="75%"></canvas>
+  <div style="margin: auto; text-align: center;">
+    <% if (qtPages> 0) { %>
+      <ul class="pagination text-center bg">
+        <% if (page==1) { %>
+          <li class="disabled"><a>First</a></li>
+          <% } else { %>
+            <li><a href="/?page=1">First</a></li>
             <% } %>
 
-             <% var i = (Number(page) > 31 ? Number(page) - 30 : 1) %>
-            <% if (i !== 1) { %>
-                <li class="disabled"><a>...</a></li>
-            <% } %>
+              <% var i=(Number(page)> 31 ? Number(page) - 30 : 1) %>
+                <% if (i !==1) { %>
+                  <li class="disabled"><a>...</a></li>
+                  <% } %>
 
-            <% for (; i <= (Number(page) + 30) && i <= qtPages; i++) { %>
-                <% if (i == page) { %>
-                    <li class="active"><a><%= i %></a></li>
-                <% } else { %>
-                    <li><a href="/?page=<%= i %>"><%= i %></a></li>
-                <% } %>
+                    <% for (; i <=(Number(page) + 30) && i <=qtPages; i++) { %>
+                      <% if (i==page) { %>
+                        <li class="active"><a>
+                            <%= i %>
+                          </a></li>
+                        <% } else { %>
+                          <li><a href="/?page=<%= i %>">
+                              <%= i %>
+                            </a></li>
+                          <% } %>
 
-                <% if (i == Number(page) + 30 && i < qtPages) { %>
-                    <li class="disabled"><a>...</a></li>
-                <% } %>
+                            <% if (i==Number(page) + 30 && i < qtPages) { %>
+                              <li class="disabled"><a>...</a></li>
+                              <% } %>
 
-            <% } %>
+                                <% } %>
 
-            <% if (page == qtPages) { %>
-                <li class="disabled"><a>Last</a></li>
-            <% } else { %>
-                <li><a href="/?page=<%= qtPages %>">Last</a></li>
-            <% } %>
-        </ul>
-    <% } %>
-    
-    </div>
-    <script>
-      let internalTemperature = [];
-      let externalTemperature = [];
-      let internalHumidity = [];
-      let externalHumidity = [];
-      let time = [];
-      async function getData() { 
-        //const resp = await fetch("http://localhost:3000/telemetry");
-        const resp = JSON.parse('<%- data %>')
-        //const json = await resp.json();
-        resp.map((temp) => {
-          internalTemperature.push(parseFloat(temp.temperature).toFixed(2));
+                                  <% if (page==qtPages) { %>
+                                    <li class="disabled"><a>Last</a></li>
+                                    <% } else { %>
+                                      <li><a href="/?page=<%= qtPages %>">Last</a></li>
+                                      <% } %>
+      </ul>
+      <% } %>
 
-          const timeFormated = `${new Date(temp.date).getDate()}/${new Date(temp.date).getMonth() + 1}/${new Date(temp.date).getFullYear()} ${new Date(temp.date).getHours()}h`;time.push(timeFormated);
+  </div>
+  <script>
+    let internalTemperature = [];
+    let externalTemperature = [];
+    let internalHumidity = [];
+    let externalHumidity = [];
+    let time = [];
+    async function getData() {
+      //const resp = await fetch("http://localhost:3000/telemetry");
+      const resp = JSON.parse('<%- data %>')
+      //const json = await resp.json();
+      resp.map((temp) => {
+        internalTemperature.push(parseFloat(temp.temperature).toFixed(2));
 
-          externalTemperature.push(temp.external_temperature);
+        const timeFormated = `${new Date(temp.date).getDate()}/${new Date(temp.date).getMonth() + 1}/${new Date(temp.date).getFullYear()} ${new Date(temp.date).getHours()}h`; time.push(timeFormated);
 
-          internalHumidity.push(parseFloat(temp.humidity).toFixed(2));
+        externalTemperature.push(temp.external_temperature);
 
-          externalHumidity.push(parseFloat(temp.external_humidity));
+        internalHumidity.push(parseFloat(temp.humidity).toFixed(2));
 
-          window.myChart.update();
-        });
-      }
+        externalHumidity.push(parseFloat(temp.external_humidity));
 
-      var ctx = document.getElementById("myChart").getContext("2d");
-      var myChart = new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: time,
-          datasets: [
+        window.myChart.update();
+      });
+    }
+
+    var ctx = document.getElementById("myChart").getContext("2d");
+    var myChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: time,
+        datasets: [
+          {
+            label: "Internal Temperature",
+            data: internalTemperature,
+            backgroundColor: "red",
+            borderColor: "red",
+            fill: false,
+
+            borderWidth: 1,
+          },
+          {
+            label: "External Temperature",
+            data: externalTemperature,
+            backgroundColor: "blue",
+            borderColor: "blue",
+            fill: false,
+
+            borderWidth: 1,
+          },
+          {
+            label: "Internal Humidity",
+            data: internalHumidity,
+            backgroundColor: "yellow",
+            borderColor: "yellow",
+            fill: false,
+
+            borderWidth: 1,
+          },
+          {
+            label: "External Humidity",
+            data: externalHumidity,
+            backgroundColor: "green",
+            borderColor: "green",
+            fill: false,
+
+            borderWidth: 1,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        title: {
+          display: true,
+          text: "Temperature Monitor",
+        },
+        tooltips: {
+          mode: "index",
+          intersect: false,
+        },
+        hover: {
+          mode: "nearest",
+          intersect: true,
+        },
+        scales: {
+          xAxes: [
             {
-              label: "Internal Temperature",
-              data: internalTemperature,
-              backgroundColor: "red",
-              borderColor: "red",
-              fill: false,
-
-              borderWidth: 1,
+              display: true,
+              scaleLabel: {
+                display: true,
+                labelString: "Hour",
+                fontColor: "#FFF",
+              },
+              gridLines: {
+                color: "#262626",
+              },
+              ticks: {
+                //fontColor: '#FFF'
+                min: 0,
+                max: 24,
+              },
             },
+          ],
+          yAxes: [
             {
-              label: "External Temperature",
-              data: externalTemperature,
-              backgroundColor: "blue",
-              borderColor: "blue",
-              fill: false,
+              display: true,
+              scaleLabel: {
+                display: true,
+                labelString: "Temperature/Humidity",
+                fontColor: "#FFF",
+              },
+              gridLines: {
+                color: "#1a1a1a",
+              },
+              ticks: {
+                //fontColor: '#FFF',
+                min: 0,
+                max: 100,
 
-              borderWidth: 1,
-            },
-            {
-              label: "Internal Humidity",
-              data: internalHumidity,
-              backgroundColor: "yellow",
-              borderColor: "yellow",
-              fill: false,
-
-              borderWidth: 1,
-            },
-            {
-              label: "External Humidity",
-              data: externalHumidity,
-              backgroundColor: "green",
-              borderColor: "green",
-              fill: false,
-
-              borderWidth: 1,
+                // forces step size to be 5 units
+                stepSize: 5,
+              },
             },
           ],
         },
-        options: {
-          responsive: true,
-          title: {
-            display: true,
-            text: "Temperature Monitor",
-          },
-          tooltips: {
-            mode: "index",
-            intersect: false,
-          },
-          hover: {
-            mode: "nearest",
-            intersect: true,
-          },
-          scales: {
-            xAxes: [
-              {
-                display: true,
-                scaleLabel: {
-                  display: true,
-                  labelString: "Hour",
-                  fontColor: "#FFF",
-                },
-                gridLines: {
-                  color: "#262626",
-                },
-                ticks: {
-                  //fontColor: '#FFF'
-                  min: 0,
-                  max: 24,
-                },
-              },
-            ],
-            yAxes: [
-              {
-                display: true,
-                scaleLabel: {
-                  display: true,
-                  labelString: "Temperature/Humidity",
-                  fontColor: "#FFF",
-                },
-                gridLines: {
-                  color: "#1a1a1a",
-                },
-                ticks: {
-                  //fontColor: '#FFF',
-                  min: 0,
-                  max: 100,
+      },
+    });
+    getData();
+  </script>
+</body>
 
-                  // forces step size to be 5 units
-                  stepSize: 5,
-                },
-              },
-            ],
-          },
-        },
-      });
-      getData();
-    </script>
-  </body>
 </html>
