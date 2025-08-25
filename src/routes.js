@@ -9,11 +9,13 @@ const DDNSController = require("./app/controllers/DDNSController");
 const PoweroffDisplayController = require("./app/controllers/PoweroffDisplayController");
 const NotificationController = require("./app/controllers/NotificationController");
 const IndicatorsController = require("./app/controllers/IndicatorsController");
+const RadioOnlineController = require("./app/controllers/RadioOnlineController");
 const routes = new Router();
 
 routes.get("/", GraphController.index);
 routes.get("/gascalculator", GasCalculatorController.index);
 routes.get("/indicators", IndicatorsController.index);
+routes.get("/radio", RadioOnlineController.index);
 
 routes.get("/telemetry", TelemetryController.index);
 

@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Player de Rádio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1976d2">
+    <link rel="icon" href="/images/icons/antena_radio.png" type="image/png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <link rel="apple-touch-icon" href="favicon.ico">
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background: #f0f0f0;
+            width: 100vw;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 0;
+            width: 100vw;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: white;
+            padding: 12px;
+            border-radius: 10px;
+            max-width: 400px;
+            width: 100%;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+            box-sizing: border-box;
+        }
+
+        h2 {
+            font-size: 1.1em;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            margin-bottom: 4px;
+            font-size: 0.98em;
+        }
+
+        select,
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            font-size: 0.98em;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 8px 12px;
+            margin-right: 5px;
+            margin-bottom: 8px;
+            font-size: 1em;
+            border-radius: 6px;
+            border: none;
+            background: #1976d2;
+            color: white;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #1565c0;
+        }
+
+        .controls {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .progress-container,
+        .volume-container {
+            margin-top: 12px;
+        }
+
+        progress {
+            width: 100%;
+            height: 14px;
+            border-radius: 8px;
+            background: #eee;
+        }
+
+        #recentStations label {
+            font-size: 0.95em;
+        }
+
+        #recentStations div {
+            gap: 8px !important;
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 600px) {
+            .container {
+                padding: 4px;
+                border-radius: 0;
+                box-shadow: none;
+                max-width: 100vw;
+                width: 100vw;
+                margin: 0;
+            }
+
+            h2 {
+                font-size: 1em;
+            }
+
+            button {
+                font-size: 0.95em;
+                padding: 7px 8px;
+            }
+
+            select,
+            input[type="text"] {
+                font-size: 0.95em;
+                padding: 7px;
+            }
+
+            progress {
+                height: 10px;
+            }
+
+            #recentStations div {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 6px !important;
+            }
+        }
+
+        /* Extra: make controls more touch-friendly */
+        .controls button {
+            min-width: 60px;
+        }
+
+        /* Hide scrollbars on mobile */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>🎙️ Player de Rádio Online</h2>
+        <label for="countrySelect">🌍 País:</label>
+        <select id="countrySelect">
+            <option value="">Selecione um país</option>
+        </select>
+        <label for="stateSelect">🏙️ Estado:</label>
+        <select id="stateSelect">
+            <option value="">Todos os estados</option>
+        </select>
+        <label for="stationSelect">📻 Estação:</label>
+        <select id="stationSelect">
+            <option value="">Selecione uma estação</option>
+        </select>
+        <div id="stationInfo" style="display:none; align-items:center; gap:10px; margin-bottom:10px;">
+            <img id="stationIcon" src="" alt="Favicon"
+                style="width:32px;height:32px;border-radius:6px;border:1px solid #ccc;background:#fff;">
+            <span id="stationLabel" style="font-weight:bold;"></span>
+        </div>
+        <div id="noStationLabel" style="display:none; color:#d32f2f; font-weight:bold; margin-bottom:10px;">
+            Nenhuma estação selecionada.
+        </div>
+        <!-- Histórico das últimas 10 estações -->
+        <div id="recentStations" style="margin-bottom:10px;"></div>
+        <button id="clearRecentBtn"
+            style="display:block;margin:0 auto 10px auto;padding:4px 10px;font-size:0.95em;border-radius:6px;border:1px solid #ccc;background:#f5f5f5;color:#444;cursor:pointer;">Limpar
+            últimas estações</button>
+        <input type="text" id="streamUrl" placeholder="Cole a URL do stream de rádio aqui" hidden="true">
+        <div class="controls">
+            <button onclick="playStream()">▶️ Play</button>
+            <button onclick="pauseStream()">⏸️ Pause</button>
+            <button onclick="stopStream()">⏹️ Stop</button>
+        </div>
+        <div class="progress-container">
+            <label>⏱️ Progresso:</label>
+            <progress id="progressBar" value="0" max="100"></progress>
+        </div>
+        <div class="volume-container">
+            <label for="volumeControl">🔊 Volume:</label>
+            <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="1">
+        </div>
+        <audio id="radioPlayer" preload="auto"></audio>
+    </div>
+
+    <script>
+        const audio = document.getElementById('radioPlayer');
+        const progressBar = document.getElementById('progressBar');
+        const volumeControl = document.getElementById('volumeControl');
+        const countrySelect = document.getElementById('countrySelect');
+        const stateSelect = document.getElementById('stateSelect');
+        const stationSelect = document.getElementById('stationSelect');
+        const stationInfo = document.getElementById('stationInfo');
+        const stationIcon = document.getElementById('stationIcon');
+        const stationLabel = document.getElementById('stationLabel');
+
+        let stationsData = [];
+        const RECENT_KEY = 'recentStations';
+        const LAST_SELECTION_KEY = 'lastSelection';
+        let recentStations = [];
+
+        // Carrega países da API e preenche o select
+        fetch('http://fi1.api.radio-browser.info/json/countries')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(country => {
+                    const option = document.createElement('option');
+                    option.value = country.name;
+                    option.textContent = country.name;
+                    countrySelect.appendChild(option);
+                });
+                loadLastSelection(); // Carrega seleção após países
+            })
+            .catch(() => {
+                const option = document.createElement('option');
+                option.textContent = 'Erro ao carregar países';
+                countrySelect.appendChild(option);
+            });
+
+        // Carrega estações ao selecionar um país
+        countrySelect.addEventListener('change', () => {
+            const country = countrySelect.value;
+            saveLastSelection({ country }); // Salva país
+            stationSelect.innerHTML = '<option value="">Selecione uma estação</option>';
+            stateSelect.innerHTML = '<option value="">Todos os estados</option>';
+            document.getElementById('streamUrl').value = '';
+            if (country) {
+                fetch(`http://fi1.api.radio-browser.info/json/stations/search?country=${encodeURIComponent(country)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        stationsData = data;
+                        // Preenche estados únicos
+                        const states = [...new Set(data.map(station => station.state).filter(s => s))];
+                        states.sort();
+                        states.forEach(state => {
+                            const option = document.createElement('option');
+                            option.value = state;
+                            option.textContent = state;
+                            stateSelect.appendChild(option);
+                        });
+                        fillStations(data);
+                        loadLastSelection(true); // Carrega estado/estação após estações
+                    })
+                    .catch(() => {
+                        const option = document.createElement('option');
+                        option.textContent = 'Erro ao carregar estações';
+                        stationSelect.appendChild(option);
+                    });
+            }
+        });
+
+        // Filtra estações pelo estado selecionado
+        stateSelect.addEventListener('change', () => {
+            const selectedState = stateSelect.value;
+            // Só salva se o usuário realmente selecionar um estado (não no carregamento inicial)
+            if (selectedState !== "") {
+                saveLastSelection({ state: selectedState });
+            }
+            let filteredStations = stationsData;
+            if (selectedState) {
+                filteredStations = stationsData.filter(station => station.state === selectedState);
+            }
+            fillStations(filteredStations);
+            loadLastSelection(true); // Carrega estação após filtrar
+        });
+
+        function fillStations(stations) {
+            stationSelect.innerHTML = '';
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Selecione uma estação';
+            stationSelect.appendChild(defaultOption);
+
+            stations.forEach(station => {
+                const option = document.createElement('option');
+                option.value = station.url_resolved;
+                option.textContent = station.name;
+                stationSelect.appendChild(option);
+            });
+            stationInfo.style.display = 'none';
+            document.getElementById('noStationLabel').style.display = 'block';
+        }
+
+        // Carrega histórico do localStorage
+        function loadRecentStations() {
+            const saved = localStorage.getItem(RECENT_KEY);
+            recentStations = saved ? JSON.parse(saved) : [];
+            renderRecentStations();
+        }
+
+        // Salva histórico no localStorage
+        function saveRecentStations() {
+            localStorage.setItem(RECENT_KEY, JSON.stringify(recentStations));
+        }
+
+        // Renderiza as últimas 10 estações
+        function renderRecentStations() {
+            const container = document.getElementById('recentStations');
+            if (!recentStations.length) {
+                container.innerHTML = '';
+                return;
+            }
+            container.innerHTML = '<label style="margin-bottom:4px;">Últimas estações:</label>';
+            // Grid com 5 itens por linha, ícone em cima, nome embaixo
+            let grid = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">';
+            recentStations.forEach((station, idx) => {
+                let favicon = station.favicon && station.favicon.trim() !== '' ? station.favicon : '';
+                if (!favicon) {
+                    // Ícone SVG de antena de rádio
+                    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40">
+                <rect width="40" height="40" rx="8" fill="#eee"/>
+                <circle cx="20" cy="28" r="6" fill="#976be3"/>
+                <rect x="18" y="10" width="4" height="18" fill="#888"/>
+                <path d="M20 10 Q15 18 20 26 Q25 18 20 10" stroke="#888" stroke-width="2" fill="none"/>
+                <circle cx="20" cy="10" r="3" fill="#976be3"/>
+            </svg>`;
+                    favicon = "/images/icons/antena_radio.png" || 'D:\\Users\\Rodrigo\\Downloads\\antena_radio.png' /* 'data:image/svg+xml;utf8,' + encodeURIComponent(svg); */
+                }
+                grid += `<div style="display:flex;flex-direction:column;align-items:center;justify-content:top;cursor:pointer;" onclick="playRecentStation(${idx})">
+            <img src="${favicon}" style="width:40px;height:40px;border-radius:8px;border:1px solid #ccc;background:#fff;object-fit:contain;">
+            <span style="font-size:0.93em;text-align:center;word-break:break-word;margin-top:4px;">${station.name}</span>
+        </div>`;
+            });
+            grid += '</div>';
+            container.innerHTML += grid;
+        }
+
+        // Adiciona estação ao histórico
+        function addRecentStation(station) {
+            recentStations = recentStations.filter(s => s.url_resolved !== station.url_resolved);
+            recentStations.unshift({
+                name: station.name,
+                favicon: station.favicon,
+                url_resolved: station.url_resolved
+            });
+            if (recentStations.length > 10) recentStations = recentStations.slice(0, 10);
+            saveRecentStations();
+            renderRecentStations();
+        }
+
+        // Função global para tocar estação do histórico
+        window.playRecentStation = function (idx) {
+            const station = recentStations[idx];
+            if (!station) return;
+            document.getElementById('streamUrl').value = station.url_resolved;
+            audio.pause();
+            audio.src = '';
+            audio.src = station.url_resolved;
+            audio.load();
+            audio.play();
+
+            // Atualiza info visual
+            let favicon = station.favicon && station.favicon.trim() !== '' ? station.favicon : '';
+            if (!favicon) {
+                favicon = "/images/icons/antena_radio.png" || 'D:\\Users\\Rodrigo\\Downloads\\antena_radio.png' //'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" rx="6" fill="%23eee"/><circle cx="16" cy="16" r="10" fill="%23976be3"/><rect x="8" y="15" width="16" height="3" fill="white"/></svg>';
+            }
+            stationIcon.src = favicon;
+            stationLabel.textContent = station.name;
+            stationInfo.style.display = 'flex';
+            document.getElementById('noStationLabel').style.display = 'none';
+
+            // Seleciona no select se existir
+            for (let i = 0; i < stationSelect.options.length; i++) {
+                if (stationSelect.options[i].value === station.url_resolved) {
+                    stationSelect.selectedIndex = i;
+                    break;
+                }
+            }
+
+            // Salva última seleção
+            saveLastSelection({ station: station.url_resolved });
+        };
+
+        // Preenche o campo de URL ao selecionar uma estação e mostra info
+        stationSelect.addEventListener('change', () => {
+            const url = stationSelect.value;
+            document.getElementById('streamUrl').value = url;
+            const selectedStation = stationsData.find(station => station.url_resolved === url);
+            if (selectedStation) {
+                let favicon = selectedStation.favicon && selectedStation.favicon.trim() !== '' ? selectedStation.favicon : '';
+                if (!favicon) {
+                    favicon = "/images/icons/antena_radio.png" || 'D:\\Users\\Rodrigo\\Downloads\\antena_radio.png' //'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" rx="6" fill="%23eee"/><circle cx="16" cy="16" r="10" fill="%23976be3"/><rect x="8" y="15" width="16" height="3" fill="white"/></svg>';
+                }
+                stationIcon.src = favicon;
+                stationLabel.textContent = `${selectedStation.name} - ${selectedStation.state || 'Sem estado'} - ${selectedStation.country}`;
+                stationInfo.style.display = 'flex';
+                document.getElementById('noStationLabel').style.display = 'none';
+                audio.pause();
+                audio.src = '';
+                audio.src = url;
+                audio.load();
+                audio.play();
+                addRecentStation(selectedStation);
+                saveLastSelection({ station: url });
+            } else {
+                stationInfo.style.display = 'none';
+                document.getElementById('noStationLabel').style.display = 'block';
+            }
+        });
+
+        function playStream() {
+            const url = document.getElementById('streamUrl').value;
+            if (url) {
+                audio.src = url;
+                audio.play();
+                saveLastSelection({ station: url });
+            }
+        }
+
+        function pauseStream() {
+            audio.pause();
+        }
+
+        function stopStream() {
+            audio.pause();
+            audio.src = '';
+            progressBar.value = 0;
+        }
+
+        setInterval(() => {
+            if (!audio.paused && !audio.ended) {
+                progressBar.value = (progressBar.value + 1) % 100;
+            }
+        }, 1000);
+
+        volumeControl.addEventListener('input', () => {
+            audio.volume = volumeControl.value;
+        });
+
+        // Inicializa histórico ao carregar página
+        loadRecentStations();
+
+        // PWA: registra service worker se disponível
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js');
+            });
+        }
+
+        // Botão para limpar últimas estações
+        document.getElementById('clearRecentBtn').addEventListener('click', function () {
+            recentStations = [];
+            saveRecentStations();
+            renderRecentStations();
+        });
+
+        // Salva última seleção (país, estado, estação)
+        function saveLastSelection(obj) {
+            let last = localStorage.getItem(LAST_SELECTION_KEY);
+            last = last ? JSON.parse(last) : {};
+            Object.assign(last, obj);
+            localStorage.setItem(LAST_SELECTION_KEY, JSON.stringify(last));
+        }
+
+        // Carrega última seleção ao iniciar
+        function loadLastSelection(justStation = false) {
+            const last = localStorage.getItem(LAST_SELECTION_KEY);
+            if (!last) return;
+            const sel = JSON.parse(last);
+
+            // País
+            if (!justStation && sel.country) {
+                countrySelect.value = sel.country;
+                countrySelect.dispatchEvent(new Event('change'));
+            }
+
+            // Estado
+            if (!justStation && sel.state) {
+                // Aguarda o carregamento dos estados antes de selecionar
+                const trySetState = () => {
+                    const found = Array.from(stateSelect.options).some(opt => opt.value === sel.state);
+                    if (found) {
+                        stateSelect.value = sel.state;
+                        stateSelect.dispatchEvent(new Event('change'));
+                    } else {
+                        setTimeout(trySetState, 100); // Tenta novamente até encontrar
+                    }
+                };
+                trySetState();
+            }
+
+            // Estação
+            if (sel.station) {
+                // Aguarda o carregamento das estações antes de selecionar
+                const trySetStation = () => {
+                    const found = Array.from(stationSelect.options).some(opt => opt.value === sel.station);
+                    if (found) {
+                        stationSelect.value = sel.station;
+                        stationSelect.dispatchEvent(new Event('change'));
+                    } else {
+                        setTimeout(trySetStation, 100); // Tenta novamente até encontrar
+                    }
+                };
+                trySetStation();
+            }
+        }
+    </script>
+</body>
+
+</html>
