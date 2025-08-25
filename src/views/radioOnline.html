@@ -222,7 +222,7 @@
         let recentStations = [];
 
         // Carrega países da API e preenche o select
-        fetch('http://fi1.api.radio-browser.info/json/countries')
+        fetch('https://fi1.api.radio-browser.info/json/countries')
             .then(response => response.json())
             .then(data => {
                 data.forEach(country => {
@@ -247,7 +247,7 @@
             stateSelect.innerHTML = '<option value="">Todos os estados</option>';
             document.getElementById('streamUrl').value = '';
             if (country) {
-                fetch(`http://fi1.api.radio-browser.info/json/stations/search?country=${encodeURIComponent(country)}`)
+                fetch(`https://fi1.api.radio-browser.info/json/stations/search?country=${encodeURIComponent(country)}`)
                     .then(response => response.json())
                     .then(data => {
                         stationsData = data;
