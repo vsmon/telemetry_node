@@ -294,7 +294,7 @@
 
 
         // Carrega países da API e preenche o select
-        fetch('http://fi1.api.radio-browser.info/json/countries')
+        fetch('https://fi1.api.radio-browser.info/json/countries')
             .then(response => response.json())
             .then(data => {
                 data.forEach(country => {
@@ -319,7 +319,7 @@
             stateSelect.innerHTML = '<option value="">Todos os estados</option>';
             document.getElementById('streamUrl').value = '';
             if (country) {
-                fetch(`http://fi1.api.radio-browser.info/json/stations/search?country=${encodeURIComponent(country)}`)
+                fetch(`https://fi1.api.radio-browser.info/json/stations/search?country=${encodeURIComponent(country)}`)
                     .then(response => response.json())
                     .then(data => {
                         stationsData = data;
@@ -445,7 +445,7 @@
             // Atualiza info visual
             let favicon = station.favicon && station.favicon.trim() !== '' ? station.favicon : '';
             if (!favicon) {
-                favicon = "images/icons/antena_radio.png" //'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" rx="6" fill="%23eee"/><circle cx="16" cy="16" r="10" fill="%23976be3"/><rect x="8" y="15" width="16" height="3" fill="white"/></svg>';
+                favicon = "images/icons/antena_radio.png" //'data:image/svg+xml;utf8,<svg xmlns="https://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" rx="6" fill="%23eee"/><circle cx="16" cy="16" r="10" fill="%23976be3"/><rect x="8" y="15" width="16" height="3" fill="white"/></svg>';
             }
             stationIcon.src = favicon;
             stationLabel.textContent = `${station.name} - ${station.state || 'Sem estado'} - ${station.country}`;
@@ -712,7 +712,7 @@
             verificarFavorito(); // atualiza a estrela
         }
         async function buscarEstacaoPorUUID(uuid) {
-            const url = `http://fi1.api.radio-browser.info/json/stations/byuuid/${uuid}`;
+            const url = `https://fi1.api.radio-browser.info/json/stations/byuuid/${uuid}`;
 
             try {
                 const resposta = await fetch(url);
