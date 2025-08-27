@@ -8,7 +8,7 @@
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1976d2">
-    <link rel="icon" href="/images/icons/antena_radio.png" type="image/png">
+    <link rel="icon" href="images/icons/antena_radio.png" type="image/png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <link rel="apple-touch-icon" href="favicon.ico">
@@ -91,7 +91,10 @@
             justify-content: center;
         }
 
-        .progress-container,
+        .progress-container {
+            margin-top: 12px;
+        }
+
         .volume-container {
             margin-top: 12px;
         }
@@ -157,6 +160,47 @@
             width: 0px;
             background: transparent;
         }
+
+        .star {
+            font-size: 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: transparent;
+            text-shadow: 0 0 0 #666;
+            /* contorno cinza */
+        }
+
+        .favorite {
+            color: gold;
+            text-shadow: none;
+        }
+
+        .itemFavorito {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80px;
+            text-align: center;
+            font-size: 12px;
+            cursor: pointer;
+            min-width: 80px;
+            flex-shrink: 0;
+        }
+
+        .itemFavorito img {
+            width: 48px;
+            height: 48px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            background: #fff;
+            margin-bottom: 5px;
+        }
+
+        .horizontal-separator {
+            height: 3px;
+            background-color: #ccc
+        }
     </style>
 </head>
 
@@ -175,36 +219,59 @@
         <select id="stationSelect">
             <option value="">Selecione uma estação</option>
         </select>
-        <div id="stationInfo" style="display:none; align-items:center; gap:10px; margin-bottom:10px;">
-            <img id="stationIcon" src="" alt="Favicon"
-                style="width:32px;height:32px;border-radius:6px;border:1px solid #ccc;background:#fff;">
-            <span id="stationLabel" style="font-weight:bold;"></span>
+        <div id="stationInfo"
+            style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <img id="stationIcon" src="" alt="antena_radio" onerror="this.src='images/icons/antena_radio.png';"
+                    style="width:32px;height:32px;border-radius:6px;border:1px solid #ccc;background:#fff;">
+                <span id="stationLabel" style="font-weight:bold;"></span>
+            </div>
+
+            <button id="botaoFavorito" class="star" onclick="adicionarFavorito()"
+                style="font-size:24px; background:none; border:none; cursor:pointer;">
+                ⭐
+            </button>
         </div>
+
         <div id="noStationLabel" style="display:none; color:#d32f2f; font-weight:bold; margin-bottom:10px;">
             Nenhuma estação selecionada.
         </div>
+        <div class="horizontal-separator"></div>
+        <h3>Favoritos</h3>
+        <div id="listaFavoritos"
+            style="display: flex;gap: 15px;overflow-x: auto;padding: 10px 0;scroll-behavior: smooth;">
+            <!-- cada item -->
+            <div class="itemFavorito">
+                <img src="images/icons/antena_radio.png" style="width:48px; height:48px;" alt="antena_radio"
+                    onerror="this.src='images/icons/antena_radio.png';">
+                <span>Estação</span>
+            </div>
+        </div>
+        <div class="horizontal-separator"></div>
         <!-- Histórico das últimas 10 estações -->
         <div id="recentStations" style="margin-bottom:10px;"></div>
         <button id="clearRecentBtn"
             style="display:block;margin:0 auto 10px auto;padding:4px 10px;font-size:0.95em;border-radius:6px;border:1px solid #ccc;background:#f5f5f5;color:#444;cursor:pointer;">Limpar
-            últimas estações</button>
+            Estações Recentes</button>
         <input type="text" id="streamUrl" placeholder="Cole a URL do stream de rádio aqui" hidden="true">
+
+        <div class="horizontal-separator"></div>
         <div class="controls">
             <button onclick="playStream()">▶️ Play</button>
             <button onclick="pauseStream()">⏸️ Pause</button>
             <button onclick="stopStream()">⏹️ Stop</button>
         </div>
-        <div class="progress-container">
-            <label>⏱️ Progresso:</label>
-            <progress id="progressBar" value="0" max="100"></progress>
-        </div>
+
         <div class="volume-container">
             <label for="volumeControl">🔊 Volume:</label>
             <input type="range" id="volumeControl" min="0" max="1" step="0.01" value="1">
         </div>
+        <div class="progress-container">
+            <label>⏱️ Progresso:</label>
+            <progress id="progressBar" value="0" max="100"></progress>
+        </div>
         <audio id="radioPlayer" preload="auto"></audio>
     </div>
-
     <script>
         const audio = document.getElementById('radioPlayer');
         const progressBar = document.getElementById('progressBar');
@@ -221,8 +288,13 @@
         const LAST_SELECTION_KEY = 'lastSelection';
         let recentStations = [];
 
+        window.onload = () => {
+
+        };
+
+
         // Carrega países da API e preenche o select
-        fetch('https://fi1.api.radio-browser.info/json/countries')
+        fetch('http://fi1.api.radio-browser.info/json/countries')
             .then(response => response.json())
             .then(data => {
                 data.forEach(country => {
@@ -247,7 +319,7 @@
             stateSelect.innerHTML = '<option value="">Todos os estados</option>';
             document.getElementById('streamUrl').value = '';
             if (country) {
-                fetch(`https://fi1.api.radio-browser.info/json/stations/search?country=${encodeURIComponent(country)}`)
+                fetch(`http://fi1.api.radio-browser.info/json/stations/search?country=${encodeURIComponent(country)}`)
                     .then(response => response.json())
                     .then(data => {
                         stationsData = data;
@@ -308,6 +380,7 @@
             const saved = localStorage.getItem(RECENT_KEY);
             recentStations = saved ? JSON.parse(saved) : [];
             renderRecentStations();
+
         }
 
         // Salva histórico no localStorage
@@ -322,24 +395,17 @@
                 container.innerHTML = '';
                 return;
             }
-            container.innerHTML = '<label style="margin-bottom:4px;">Últimas estações:</label>';
+            container.innerHTML = '<label style="margin-bottom:4px;">Estações Recentes:</label>';
             // Grid com 5 itens por linha, ícone em cima, nome embaixo
             let grid = '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;">';
             recentStations.forEach((station, idx) => {
                 let favicon = station.favicon && station.favicon.trim() !== '' ? station.favicon : '';
                 if (!favicon) {
-                    // Ícone SVG de antena de rádio
-                    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40">
-                <rect width="40" height="40" rx="8" fill="#eee"/>
-                <circle cx="20" cy="28" r="6" fill="#976be3"/>
-                <rect x="18" y="10" width="4" height="18" fill="#888"/>
-                <path d="M20 10 Q15 18 20 26 Q25 18 20 10" stroke="#888" stroke-width="2" fill="none"/>
-                <circle cx="20" cy="10" r="3" fill="#976be3"/>
-            </svg>`;
-                    favicon = "/images/icons/antena_radio.png" || 'D:\\Users\\Rodrigo\\Downloads\\antena_radio.png' /* 'data:image/svg+xml;utf8,' + encodeURIComponent(svg); */
+
+                    favicon = "images/icons/antena_radio.png" /* 'data:image/svg+xml;utf8,' + encodeURIComponent(svg); */
                 }
                 grid += `<div style="display:flex;flex-direction:column;align-items:center;justify-content:top;cursor:pointer;" onclick="playRecentStation(${idx})">
-            <img src="${favicon}" style="width:40px;height:40px;border-radius:8px;border:1px solid #ccc;background:#fff;object-fit:contain;">
+            <img src="${favicon}" style="width:40px;height:40px;border-radius:8px;border:1px solid #ccc;background:#fff;object-fit:contain;" onerror="this.src='images/icons/antena_radio.png';">
             <span style="font-size:0.93em;text-align:center;word-break:break-word;margin-top:4px;">${station.name}</span>
         </div>`;
             });
@@ -351,17 +417,22 @@
         function addRecentStation(station) {
             recentStations = recentStations.filter(s => s.url_resolved !== station.url_resolved);
             recentStations.unshift({
+                stationuuid: station.stationuuid,
                 name: station.name,
                 favicon: station.favicon,
-                url_resolved: station.url_resolved
+                url_resolved: station.url_resolved,
+                state: station.state,
+                country: station.country
+
             });
             if (recentStations.length > 10) recentStations = recentStations.slice(0, 10);
             saveRecentStations();
             renderRecentStations();
         }
 
-        // Função global para tocar estação do histórico
+        // Função global para tocar estação do histórico e do favorito
         window.playRecentStation = function (idx) {
+
             const station = recentStations[idx];
             if (!station) return;
             document.getElementById('streamUrl').value = station.url_resolved;
@@ -374,10 +445,10 @@
             // Atualiza info visual
             let favicon = station.favicon && station.favicon.trim() !== '' ? station.favicon : '';
             if (!favicon) {
-                favicon = "/images/icons/antena_radio.png" || 'D:\\Users\\Rodrigo\\Downloads\\antena_radio.png' //'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" rx="6" fill="%23eee"/><circle cx="16" cy="16" r="10" fill="%23976be3"/><rect x="8" y="15" width="16" height="3" fill="white"/></svg>';
+                favicon = "images/icons/antena_radio.png" //'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" rx="6" fill="%23eee"/><circle cx="16" cy="16" r="10" fill="%23976be3"/><rect x="8" y="15" width="16" height="3" fill="white"/></svg>';
             }
             stationIcon.src = favicon;
-            stationLabel.textContent = station.name;
+            stationLabel.textContent = `${station.name} - ${station.state || 'Sem estado'} - ${station.country}`;
             stationInfo.style.display = 'flex';
             document.getElementById('noStationLabel').style.display = 'none';
 
@@ -389,8 +460,18 @@
                 }
             }
 
+            verificarFavorito();
+
             // Salva última seleção
-            saveLastSelection({ station: station.url_resolved });
+            saveLastSelection({
+                stationuuid: station.stationuuid,
+                name: station.name,
+                favicon: station.favicon,
+                station: station.url_resolved,
+                country: station.countr,
+                state: station.state
+            });
+
         };
 
         // Preenche o campo de URL ao selecionar uma estação e mostra info
@@ -401,7 +482,7 @@
             if (selectedStation) {
                 let favicon = selectedStation.favicon && selectedStation.favicon.trim() !== '' ? selectedStation.favicon : '';
                 if (!favicon) {
-                    favicon = "/images/icons/antena_radio.png" || 'D:\\Users\\Rodrigo\\Downloads\\antena_radio.png' //'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" rx="6" fill="%23eee"/><circle cx="16" cy="16" r="10" fill="%23976be3"/><rect x="8" y="15" width="16" height="3" fill="white"/></svg>';
+                    favicon = "images/icons/antena_radio.png" //'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" rx="6" fill="%23eee"/><circle cx="16" cy="16" r="10" fill="%23976be3"/><rect x="8" y="15" width="16" height="3" fill="white"/></svg>';
                 }
                 stationIcon.src = favicon;
                 stationLabel.textContent = `${selectedStation.name} - ${selectedStation.state || 'Sem estado'} - ${selectedStation.country}`;
@@ -413,7 +494,15 @@
                 audio.load();
                 audio.play();
                 addRecentStation(selectedStation);
-                saveLastSelection({ station: url });
+                saveLastSelection({
+                    stationuuid: selectedStation.stationuuid,
+                    name: selectedStation.name,
+                    favicon: selectedStation.favicon,
+                    station: url,
+                    country: selectedStation.country,
+                    state: selectedStation.state
+                });
+                verificarFavorito();
             } else {
                 stationInfo.style.display = 'none';
                 document.getElementById('noStationLabel').style.display = 'block';
@@ -451,6 +540,8 @@
 
         // Inicializa histórico ao carregar página
         loadRecentStations();
+        renderizarFavoritos();
+        verificarFavorito();
 
         // PWA: registra service worker se disponível
         if ('serviceWorker' in navigator) {
@@ -472,6 +563,7 @@
             last = last ? JSON.parse(last) : {};
             Object.assign(last, obj);
             localStorage.setItem(LAST_SELECTION_KEY, JSON.stringify(last));
+            verificarFavorito();
         }
 
         // Carrega última seleção ao iniciar
@@ -516,7 +608,140 @@
                 trySetStation();
             }
         }
+        function adicionarFavorito() {
+
+            const nome = document.getElementById("stationLabel").textContent;
+            const icone = document.getElementById("stationIcon").src;
+            const botao = document.getElementById("botaoFavorito");
+
+            const resp = localStorage.getItem(LAST_SELECTION_KEY);
+            const last = JSON.parse(resp)
+
+            let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+
+            const index = favoritos.findIndex(est => est.name === last.name);
+
+            if (index === -1) {
+                favoritos.push({ stationuuid: last.stationuuid, url: last.station, name: last.name, favicon: last.favicon, country: last.country, state: last.state });
+                localStorage.setItem("favoritos", JSON.stringify(favoritos));
+                botao.classList.add("favorite");
+            } else {
+                favoritos.splice(index, 1);
+                localStorage.setItem("favoritos", JSON.stringify(favoritos));
+                botao.classList.remove("favorite");
+            }
+            renderizarFavoritos();
+
+        }
+
+        function alternarFavorito() {
+            const nome = document.getElementById("stationLabel").textContent;
+            const icone = document.getElementById("stationIcon").src;
+            const botao = document.getElementById("botaoFavorito");
+
+            let favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+
+            const index = favoritos.findIndex(est => est.nome === nome);
+
+            if (index === -1) {
+                favoritos.push({ nome, icone });
+                localStorage.setItem("favoritos", JSON.stringify(favoritos));
+                botao.classList.add("favorite");
+            } else {
+                favoritos.splice(index, 1);
+                localStorage.setItem("favoritos", JSON.stringify(favoritos));
+                botao.classList.remove("favorite");
+            }
+        }
+
+        function verificarFavorito() {
+            const nome = document.getElementById("stationLabel").textContent;
+
+            const lastSelection = JSON.parse(localStorage.getItem(LAST_SELECTION_KEY))
+
+            const botao = document.getElementById("botaoFavorito");
+
+            const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+
+            const estaNosFavoritos = favoritos.some(est => est.name === lastSelection.name);
+
+            botao.classList.toggle("favorite", estaNosFavoritos);
+        }
+
+        function renderizarFavoritos() {
+            const container = document.getElementById("listaFavoritos");
+            container.innerHTML = ""; // limpa antes de renderizar
+
+            const favoritos = JSON.parse(localStorage.getItem("favoritos")) || [];
+
+            favoritos.forEach(estacao => {
+                const favicon = estacao.favicon === "" ? "images/icons/antena_radio.png" : estacao.favicon
+                const item = document.createElement("div");
+                item.className = "itemFavorito";
+
+                item.innerHTML = `
+      <img src="${favicon}" alt="antena_radio" onerror="this.src='images/icons/antena_radio.png';">
+      <span>${estacao.name}</span>
+    `;
+
+                item.onclick = () => {
+                    saveLastSelection({
+                        country: estacao.country,
+                        state: estacao.state,
+                        favicon: estacao.favicon,
+                        name: estacao.name,
+                        station: estacao.station,
+                        stationuuid: estacao.stationuuid
+                    })
+                    document.getElementById('streamUrl').value = estacao.url;
+                    audio.pause();
+                    audio.src = '';
+                    audio.src = estacao.url;
+                    audio.load();
+                    audio.play();
+                    mostrarEstacao(estacao.name, estacao.favicon, estacao.state, estacao.country);
+                };
+
+                container.appendChild(item);
+            });
+        }
+        function mostrarEstacao(name, favicon, state, country) {
+            document.getElementById("stationIcon").src = favicon;
+            ocument.getElementById("stationLabel").textContent = `${name} - ${state || 'Sem estado'} - ${country}`;
+            document.getElementById("stationInfo").style.display = "flex";
+            verificarFavorito(); // atualiza a estrela
+        }
+        async function buscarEstacaoPorUUID(uuid) {
+            const url = `http://fi1.api.radio-browser.info/json/stations/byuuid/${uuid}`;
+
+            try {
+                const resposta = await fetch(url);
+                if (!resposta.ok) {
+                    throw new Error(`Erro na requisição: ${resposta.status}`);
+                }
+
+                const dados = await resposta.json();
+
+                if (dados.length === 0) {
+                    console.warn("Nenhuma estação encontrada com esse UUID.");
+                    return null;
+                }
+
+                const estacao = dados[0];
+                console.log("Estação encontrada:", estacao);
+
+                // Exemplo: atualizar a interface
+                mostrarEstacao(estacao.name, estacao.favicon);
+
+                return estacao;
+            } catch (erro) {
+                console.error("Erro ao buscar estação:", erro);
+                return null;
+            }
+        }
+
     </script>
+
 </body>
 
 </html>
