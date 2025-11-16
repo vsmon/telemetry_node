@@ -5,6 +5,7 @@ const ExternalIp = require("../models/ExternalIp");
 const sequelize = require("sequelize");
 const fetch = require("node-fetch");
 const notification = require("../../services/notification");
+const updateCloudflareAccess = require("../../services/updateCloudflareAccess");
 
 class ExternalIpController {
   async store(req, res) {
@@ -54,10 +55,33 @@ class ExternalIpController {
           .status(400)
           .json({ error: "Internal or External IP not available" });
       }
-      const ip = await ExternalIp.create({
-        external_ip: externalIp,
-        internal_ip: internalIp,
+
+      const lastExternalIpStored = await ExternalIp.findOne({
+        order: [["createdAt", "DESC"]],
       });
+
+      /* Add external IP on database and Update External IP on cloudflare access app policies  */
+      console.log(lastExternalIpStored.dataValues.external_ip, externalIp);
+      if (lastExternalIpStored.dataValues.external_ip !== externalIp) {
+        const ip = await ExternalIp.create({
+          external_ip: externalIp,
+          internal_ip: internalIp,
+        });
+        const updateResult = await updateCloudflareAccess(externalIp);
+        if (!updateResult.success) {
+          console.error(
+            "Falha ao atualizar a política do Cloudflare:",
+            updateResult
+          );
+        }
+
+        const message = {
+          title: "IP Externo Alterado",
+          body: `O IP externo foi alterado para ${externalIp}.`,
+        };
+
+        notification(message);
+      }
 
       const db = getFirestore();
 
@@ -75,12 +99,6 @@ class ExternalIpController {
       const lastExternalIP = await externalIpRef.get();
 
       if (lastExternalIP.data().ip !== externalIp) {
-        const message = {
-          title: "IP Externo Alterado",
-          body: `O IP externo foi alterado para ${externalIp}.`,
-        };
-
-        notification(message);
       }
 
       await externalIpRef.set({
@@ -90,7 +108,7 @@ class ExternalIpController {
         }),
       });
 
-      return res.json({ ip });
+      return res.json({ externalIp, internalIp });
     } catch (error) {
       return res.status(400).json({ error: error.message });
     }
