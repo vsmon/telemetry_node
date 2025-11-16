@@ -2,8 +2,6 @@ require("../../config/firebase");
 const { getFirestore } = require("firebase-admin/firestore");
 const { spawn } = require("child_process");
 const ExternalIp = require("../models/ExternalIp");
-const sequelize = require("sequelize");
-const fetch = require("node-fetch");
 const notification = require("../../services/notification");
 const updateCloudflareAccess = require("../../services/updateCloudflareAccess");
 
