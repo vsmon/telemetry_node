@@ -75,6 +75,16 @@
             content: "📊";
         }
 
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+            margin-bottom: 15px;
+            height: 340px;
+            /* garante altura do canvas mesmo com maintainAspectRatio:false */
+        }
+
         @media (max-width: 480px) {
             h1 {
                 font-size: 1.5rem;
@@ -86,6 +96,10 @@
             }
         }
     </style>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- plugin para mostrar valores fixos nos pontos -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 </head>
 
 <body>
@@ -97,9 +111,19 @@
         <div class="indice" id="bitcoin"><span>Bitcoin (BRL)</span><span>carregando...</span></div>
         <div class="indice" id="bitcoin-usd"><span>Bitcoin (USD)</span><span>carregando...</span></div>
         <div class="indice" id="ipca"><span>IPCA 12 meses</span><span>carregando...</span></div>
+
+        <!-- novo: gráfico do IPCA dos últimos 12 meses -->
+        <div class="chart-container">
+            <canvas id="ipcaChart" width="600" height="320"></canvas>
+        </div>
     </div>
 
     <script>
+        // registra plugin se disponível
+        if (window.Chart && window.ChartDataLabels) {
+            Chart.register(ChartDataLabels);
+        }
+
         async function atualizarIndices() {
             try {
                 const [selicResp, cdiResp, dolarResp, bitcoinBRLResp, bitcoinUSDResp, ipcaResp] = await Promise.all([
@@ -141,6 +165,94 @@
 
                 const ipcaAcumulado = ipca.reduce((soma, item) => soma + parseFloat(item.valor), 0);
                 document.getElementById("ipca").children[1].innerText = ipcaAcumulado.toFixed(2) + "%";
+
+                // preparar dados do gráfico (ordenar do mais antigo ao mais recente)
+                const ipcaOrdenado = ipca.slice().reverse();
+                const labels = ipcaOrdenado.map(item => item.data);
+                const dataPoints = ipcaOrdenado.map(item => parseFloat(item.valor));
+
+                // criar gráfico com Chart.js
+                const ctx = document.getElementById('ipcaChart').getContext('2d');
+
+                // destruir gráfico anterior se existir (atualizações periódicas)
+                if (window._ipcaChartInstance) {
+                    window._ipcaChartInstance.destroy();
+                }
+
+                window._ipcaChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'IPCA (%)',
+                            data: dataPoints,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59,130,246,0.12)',
+                            tension: 0.3,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#1e40af',
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                ticks: {
+                                    maxRotation: 0,
+                                    autoSkip: true,
+                                    maxTicksLimit: 6
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function (value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'IPCA - Últimos 12 meses',
+                                font: {
+                                    size: 16,
+                                    weight: '600'
+                                }
+                            },
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        const v = context.parsed.y;
+                                        return v + '%';
+                                    }
+                                }
+                            },
+                            datalabels: {
+                                display: true,
+                                anchor: 'end',
+                                align: 'top',
+                                offset: 6,
+                                color: '#1e40af',
+                                font: {
+                                    weight: '600',
+                                    size: 11
+                                },
+                                formatter: function (value) {
+                                    // formata com 2 casas decimais e sinal de %
+                                    return parseFloat(value).toFixed(2) + '%';
+                                }
+                            }
+                        }
+                    }
+                });
+
             } catch (error) {
                 console.error("Erro ao buscar dados:", error);
                 alert("Erro ao carregar dados financeiros. Tente novamente mais tarde.");
