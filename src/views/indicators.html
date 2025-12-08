@@ -167,8 +167,13 @@
                 document.getElementById("ipca").children[1].innerText = ipcaAcumulado.toFixed(2) + "%";
 
                 // preparar dados do gráfico (ordenar do mais antigo ao mais recente)
-                const ipcaOrdenado = ipca.slice().reverse();
-                const labels = ipcaOrdenado.map(item => item.data);
+                const ipcaOrdenado = ipca.slice();
+                //const labels = ipcaOrdenado.map(item => item.data);
+                const labels = ipcaOrdenado.map(item => {
+                    const [dia, mes, ano] = item.data.split('/');
+                    return `${mes}/${ano.slice(-2)}`;  // MM/YY
+                })
+
                 const dataPoints = ipcaOrdenado.map(item => parseFloat(item.valor));
 
                 // criar gráfico com Chart.js
@@ -231,7 +236,16 @@
                                     label: function (context) {
                                         const v = context.parsed.y;
                                         return v + '%';
-                                    }
+                                    }/*,
+                                     title: (context) => {
+                                        // label original: "01/11/2025"
+                                        const label = context[0].label;
+                                        const [dia, mes, ano] = label.split('/');
+
+                                        const shortYear = ano.slice(-2); // 2025 → 25
+
+                                        return `${mes}/${shortYear}`;
+                                    } */
                                 }
                             },
                             datalabels: {
