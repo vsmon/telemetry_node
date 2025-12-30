@@ -10,14 +10,6 @@ const admin = require("../../config/firebase");
 const notification = require("../../services/notification");
 
 class TelemetryController {
-  async email(req, res) {
-    try {
-      await Mail.sendMail("teste de email", "Teste de envio");
-      return res.status(200).json({ true: "ok" });
-    } catch (error) {
-      console.log(error);
-    }
-  }
   async store(req, res) {
     const maxId = await Telemetry.max("id");
 

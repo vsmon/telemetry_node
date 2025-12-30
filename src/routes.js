@@ -10,6 +10,8 @@ const PoweroffDisplayController = require("./app/controllers/PoweroffDisplayCont
 const NotificationController = require("./app/controllers/NotificationController");
 const IndicatorsController = require("./app/controllers/IndicatorsController");
 const RadioOnlineController = require("./app/controllers/RadioOnlineController");
+const EmailController = require("./app/controllers/EmailController");
+const NotificationCpuTempController = require("./app/controllers/NotificationCpuTempController");
 const routes = new Router();
 
 routes.get("/", GraphController.index);
@@ -21,7 +23,7 @@ routes.get("/telemetry", TelemetryController.index);
 
 routes.use(auth);
 
-routes.get("/temperature", CpuTempController.sendAlert);
+routes.get("/temperature", CpuTempController.cpuTemperature);
 
 routes.post("/telemetry", TelemetryController.store2);
 routes.post("/telemetry/manual", TelemetryController.store);
@@ -32,6 +34,7 @@ routes.get("/externalip", ExternalIPController.index);
 routes.get("/ddns", DDNSController.index);
 routes.post("/poweroffdisplay", PoweroffDisplayController.store);
 
-routes.get("/email", TelemetryController.email);
-routes.get("/notifications/cputemp", NotificationController.sendTemperature);
+routes.post("/email", EmailController.send);
+routes.post("/notification", NotificationController.send);
+routes.get("/notifications/cputemp", NotificationCpuTempController.send);
 module.exports = routes;

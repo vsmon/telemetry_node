@@ -2,14 +2,14 @@ const { spawn } = require("child_process");
 const Mail = require("../../services/mail");
 const notification = require("../../services/notification");
 class CpuTempController {
-  async sendAlert(req, res) {
+  async cpuTemperature(req, res) {
     try {
       console.log(
         new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })
       );
       if (process.platform === "win32") {
         return res.status(400).json({
-          error: "Essa Funcionalidade só pode ser executada no sistema linux",
+          error: "Reading raspberry pi temperature is only on linux",
         });
       }
       const temp = spawn("cat", ["/sys/class/thermal/thermal_zone0/temp"]);
