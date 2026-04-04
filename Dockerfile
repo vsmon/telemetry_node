@@ -10,6 +10,7 @@ WORKDIR /usr/app
 COPY package*.json ./
 COPY serviceAccountKey.json ./
 
+RUN apk add --no-cache curl
 ## Executa npm install para adicionar as dependências e criar a pasta node_modules
 RUN npm install
 #RUN npm install pm2 -g
