@@ -29,6 +29,7 @@ const scheduleNotifyTempCpu = "0 0 */10 * * *"; //Executa de 10 em 10 horas
 const scheduleAlertTemp = "0 */5 * * * *"; //Executa de 5 em 5 minutos
 const scheduleDDNS = "0 */5 * * * *"; //Executa de 5 em 5 minutos
 const schedulePoweroffDisplay = "0 */4 * * * *"; //Executa de 5 em 5 minutos
+const publicIPChanges = "0 */5 * * * *"; //Executa de 5 em 5 minutos
 
 //scheduler(schedule, () => TelemetryController.store2());
 scheduler(scheduleGetTelemetry, async () => {
@@ -36,7 +37,7 @@ scheduler(scheduleGetTelemetry, async () => {
     `http://localhost:3000/telemetry?token=${process.env.TOKEN}`,
     {
       method: "POST",
-    }
+    },
   );
   const json = await response.json();
   console.log(json);
@@ -48,7 +49,7 @@ scheduler(scheduleAlertTemp, async () => {
     `http://localhost:3000/temperature?token=${process.env.TOKEN}`,
     {
       method: "GET",
-    }
+    },
   );
   const json = await response.json();
   console.log(json);
@@ -58,7 +59,7 @@ scheduler(scheduleAlertTemp, async () => {
 scheduler(scheduleDDNS, async () => {
   const response = await fetch(
     `http://localhost:3000/ddns?token=${process.env.TOKEN}`,
-    { method: "GET" }
+    { method: "GET" },
   );
   const json = await response.json();
   console.log(json);
@@ -68,7 +69,7 @@ scheduler(scheduleDDNS, async () => {
 scheduler(schedulePoweroffDisplay, async () => {
   const response = await fetch(
     `http://localhost:3000/poweroffdisplay?token=${process.env.TOKEN}`,
-    { method: "POST" }
+    { method: "POST" },
   );
   const json = await response.json();
   console.log(json);
@@ -78,7 +79,17 @@ scheduler(schedulePoweroffDisplay, async () => {
 scheduler(scheduleNotifyTempCpu, async () => {
   const response = await fetch(
     `http://localhost:3000/notifications/cputemp?token=${process.env.TOKEN}`,
-    { method: "GET" }
+    { method: "GET" },
+  );
+  const json = await response.json();
+  console.log(json);
+});
+
+/*check Public IP changes*/
+scheduler(publicIPChanges, async () => {
+  const response = await fetch(
+    `http://localhost:3000/externalip?token=${process.env.TOKEN}`,
+    { method: "POST" },
   );
   const json = await response.json();
   console.log(json);

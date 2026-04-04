@@ -1,12 +1,13 @@
 const fetch = require("node-fetch");
 
-async function updateCloudflareAccess(ip) {
+async function updateCloudflareAccess(ipv4, ipv6) {
   try {
     const CF_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN;
     const CF_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID;
     const CF_POLICY_ID = process.env.CLOUDFLARE_POLICY_ID;
 
-    const newIp = `${ip}`;
+    //const newIp = `${ipv4}`;
+    //const ipv6NetworkPrefix = ipv6.split(":").slice(0, 4).join(":") + "::/64";
 
     const payload = {
       name: "by IPs",
@@ -14,7 +15,12 @@ async function updateCloudflareAccess(ip) {
       include: [
         {
           ip: {
-            ip: newIp,
+            ip: ipv4,
+          },
+        },
+        {
+          ip: {
+            ip: ipv6,
           },
         },
       ],
@@ -35,7 +41,7 @@ async function updateCloudflareAccess(ip) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
-      }
+      },
     );
 
     const data = await response.json();
@@ -45,8 +51,15 @@ async function updateCloudflareAccess(ip) {
       return { success: false, errors: data.errors };
     }
 
-    console.log("Cloudflare Access atualizado com:", newIp);
-    return { success: true, ip: newIp };
+    console.log("Cloudflare Access atualizado com:", [
+      {
+        externalIPv4: ipv4,
+      },
+      {
+        externalIPv6: ipv6,
+      },
+    ]);
+    return { success: true, payload };
   } catch (error) {
     console.error("Erro no updateCloudflareAccess:", error.message);
     return { success: false, error: error.message };
