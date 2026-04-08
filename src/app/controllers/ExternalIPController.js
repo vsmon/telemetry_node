@@ -4,6 +4,7 @@ const { spawn } = require("child_process");
 const ExternalIp = require("../models/ExternalIp");
 const notification = require("../../services/notification");
 const updateCloudflareAccess = require("../../services/updateCloudflareAccess");
+const externalIpService = require("../../services/externalIpService");
 
 class ExternalIpController {
   async store(req, res) {
@@ -14,11 +15,9 @@ class ExternalIpController {
         : "";
       const internalIp = headerIp || remoteIp;
 
-      const extIpv4 = await fetch("http://api.ipify.org/");
-      const externalIpv4 = await extIpv4.text();
+      const externalIpv4 = await externalIpService.getExternalIpv4();
 
-      const extIpv6 = await fetch("https://ifconfig.me/ip");
-      const externalIpv6 = await extIpv6.text();
+      const externalIpv6 = await externalIpService.getContainerIpv6();
       const externalIpv6NetworkPrefix =
         externalIpv6.split(":").slice(0, 4).join(":") + "::/64";
 
