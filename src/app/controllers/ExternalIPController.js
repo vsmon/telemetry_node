@@ -65,7 +65,6 @@ class ExternalIpController {
       });
 
       /* Add external IP on database and Update External IP on cloudflare access app policies  */
-      console.log(lastExternalIpStored.dataValues.external_ip, externalIpv4);
       if (
         lastExternalIpStored.dataValues.external_ip !== externalIpv4 ||
         lastExternalIpStored.dataValues.external_ipv6_network_prefix !==
@@ -75,8 +74,7 @@ class ExternalIpController {
         const ip = await ExternalIp.create({
           external_ip: externalIpv4,
           internal_ip: internalIp,
-          external_ipv6_network_prefix:
-            externalIpv6.split(":").slice(0, 4).join(":") + "::/64",
+          external_ipv6_network_prefix: externalIpv6NetworkPrefix,
         });
         console.log("Passei2====================");
         const updateResult = await updateCloudflareAccess(
@@ -92,7 +90,7 @@ class ExternalIpController {
 
         const message = {
           title: "IP Externo Alterado",
-          body: `O IP externo foi alterado para ${externalIpv4}.`,
+          body: `O IP externo foi alterado para ${externalIpv4} e ${externalIpv6NetworkPrefix}.`,
         };
 
         notification(message);
@@ -123,7 +121,11 @@ class ExternalIpController {
         }),
       });
  */
-      return res.json(lastExternalIpStored);
+      return res.json({
+        externalIpv4,
+        internalIp,
+        externalIpv6NetworkPrefix,
+      });
     } catch (error) {
       return res.status(400).json({ error: error.message });
     }
