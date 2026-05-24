@@ -292,24 +292,42 @@
 
         };
 
+        async function getActiveServers() {
+            const res = await fetch("http://all.api.radio-browser.info/json/servers");
+            const servers = await res.json();
+            console.log("CURRENTLY SERVERS============", servers);
+            return servers.map((s) => s.name);
+        }
 
-        // Carrega países da API e preenche o select
-        fetch('https://fi1.api.radio-browser.info/json/countries')
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(country => {
+        let serverUrl = '';
+
+        (async () => {
+            const servers = await getActiveServers();
+
+            if (servers.length === 0)
+                throw new Error("Nenhum servidor ativo encontrado.");
+
+            serverUrl = servers[0]; // Pegando o primeiro servidor ativo
+            console.log('SERVER URL===========', serverUrl)
+
+            // Carrega países da API e preenche o select
+            fetch(`https://${serverUrl}/json/countries`)
+                .then(response => response.json())
+                .then(data => {
+                    data.forEach(country => {
+                        const option = document.createElement('option');
+                        option.value = country.name;
+                        option.textContent = country.name;
+                        countrySelect.appendChild(option);
+                    });
+                    loadLastSelection(); // Carrega seleção após países
+                })
+                .catch(() => {
                     const option = document.createElement('option');
-                    option.value = country.name;
-                    option.textContent = country.name;
+                    option.textContent = 'Erro ao carregar países';
                     countrySelect.appendChild(option);
                 });
-                loadLastSelection(); // Carrega seleção após países
-            })
-            .catch(() => {
-                const option = document.createElement('option');
-                option.textContent = 'Erro ao carregar países';
-                countrySelect.appendChild(option);
-            });
+        })()
 
         // Carrega estações ao selecionar um país
         countrySelect.addEventListener('change', () => {
@@ -319,7 +337,7 @@
             stateSelect.innerHTML = '<option value="">Todos os estados</option>';
             document.getElementById('streamUrl').value = '';
             if (country) {
-                fetch(`https://fi1.api.radio-browser.info/json/stations/search?country=${encodeURIComponent(country)}`)
+                fetch(`https://${serverUrl}/json/stations/search?country=${encodeURIComponent(country)}`)
                     .then(response => response.json())
                     .then(data => {
                         stationsData = data;
