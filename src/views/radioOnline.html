@@ -293,7 +293,7 @@
         };
 
         async function getActiveServers() {
-            const res = await fetch("http://all.api.radio-browser.info/json/servers");
+            const res = await fetch("https://all.api.radio-browser.info/json/servers");
             const servers = await res.json();
             console.log("CURRENTLY SERVERS============", servers);
             return servers.map((s) => s.name);
