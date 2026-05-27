@@ -12,6 +12,7 @@ const IndicatorsController = require("./app/controllers/IndicatorsController");
 const RadioOnlineController = require("./app/controllers/RadioOnlineController");
 const EmailController = require("./app/controllers/EmailController");
 const NotificationCpuTempController = require("./app/controllers/NotificationCpuTempController");
+const PingController = require("./app/controllers/PingController");
 const routes = new Router();
 
 routes.get("/", GraphController.index);
@@ -20,6 +21,7 @@ routes.get("/indicators", IndicatorsController.index);
 routes.get("/radio", RadioOnlineController.index);
 
 routes.get("/telemetry", TelemetryController.index);
+routes.get("/ping", PingController.index);
 
 routes.use(auth);
 
