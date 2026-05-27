@@ -11,13 +11,17 @@ jobs:
     runs-on: ubuntu-latest
     # (Não precisa mais daquela linha "if: github.event.pull_request.merged == true")
 
-    permissions:
-      contents: read
-      packages: write  # Dá permissão explícita para o token criar/atualizar imagens no GHCR
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+        # --- PASSO NOVO 1: Configura o QEMU para emular outras arquiteturas ---
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # --- PASSO NOVO 2: Configura o Buildx do Docker ---
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Create Service Account Key File
         run: |
@@ -35,4 +39,5 @@ jobs:
         with:
           context: .
           push: true
+          platforms: linux/amd64,linux/arm64
           tags: ghcr.io/${{ github.repository }}:latest
