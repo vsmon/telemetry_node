@@ -11,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     # (Não precisa mais daquela linha "if: github.event.pull_request.merged == true")
 
+    permissions:
+      contents: read
+      packages: write  # Dá permissão explícita para o token criar/atualizar imagens no GHCR
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
