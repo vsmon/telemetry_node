@@ -7,8 +7,8 @@ FROM node:20-alpine
 WORKDIR /usr/app
 
 ## Copia tudo que começa com package e termina com .json para dentro da pasta /usr/app
-COPY package*.json ./
-COPY serviceAccountKey.json ./
+#COPY package*.json ./
+#COPY serviceAccountKey.json ./
 
 RUN apk add --no-cache curl
 ## Executa npm install para adicionar as dependências e criar a pasta node_modules
