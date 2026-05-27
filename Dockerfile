@@ -7,7 +7,7 @@ FROM node:20-alpine
 WORKDIR /usr/app
 
 ## Copia tudo que começa com package e termina com .json para dentro da pasta /usr/app
-#COPY package*.json ./
+COPY package*.json ./
 #COPY serviceAccountKey.json ./
 
 RUN apk add --no-cache curl
