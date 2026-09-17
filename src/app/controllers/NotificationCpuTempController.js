@@ -14,7 +14,7 @@ class NotificationCpuTempController {
       const currentTemp = json.temp.toFixed(2);
       const message = {
         title: "Temperatura CPU Raspberry PI",
-        body: `A temperatura atual da cpu do raspberry PI é ${currentTemp}°C. Em 85°C a cpu entrará em throttling.`,
+        body: `CPU Temp: ${currentTemp}°C. Em 85°C a cpu entrará em throttling.`,
       };
 
       notification(message);
