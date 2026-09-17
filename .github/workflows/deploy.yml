@@ -10,7 +10,10 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     # (Não precisa mais daquela linha "if: github.event.pull_request.merged == true")
-
+    # É obrigatório definir permissão de escrita para pacotes
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,7 +35,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GH_PAT_TOKEN }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
